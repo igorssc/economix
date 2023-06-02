@@ -9,7 +9,7 @@ export const metadata = {
     "Controle suas finanças de forma inteligente com o aplicativo Economix.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
