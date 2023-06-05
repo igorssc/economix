@@ -1,3 +1,5 @@
+import { NewRegister } from "@/components/NewRegister";
+
 export const metadata = {
   title: "EconomiX - Dashboard",
 };
@@ -7,5 +9,10 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <NewRegister />
+    </>
+  );
 }

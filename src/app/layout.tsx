@@ -20,7 +20,7 @@ export default async function RootLayout({
     <html lang="pt-br">
       <AuthContext>
         <body
-          className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300`}
+          className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300 relative`}
         >
           {children}
           <Footer />
