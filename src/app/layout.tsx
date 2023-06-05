@@ -1,3 +1,4 @@
+import { Footer } from "@/components/Footer";
 import AuthContext from "@/contexts/authContext";
 import { Inter } from "next/font/google";
 import "../style/globals.css";
@@ -17,9 +18,14 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="pt-br">
-      <body className={`${inter.className} bg-white dark:bg-gray-700`}>
-        <AuthContext>{children}</AuthContext>
-      </body>
+      <AuthContext>
+        <body
+          className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300`}
+        >
+          {children}
+          <Footer />
+        </body>
+      </AuthContext>
     </html>
   );
 }

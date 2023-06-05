@@ -1,6 +1,7 @@
 "use client";
-import { signOut, useSession } from "next-auth/react";
-import Image from "next/image";
+import { Box } from "@/components/Box";
+import { Nav } from "@/components/Nav";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
@@ -8,36 +9,24 @@ export default function Dashboard() {
   const router = useRouter();
 
   if (status === "loading") {
-    return <p>Carregando...</p>;
+    return null;
   }
 
-  if (!session) {
+  if (!session?.user) {
     router.push("/");
     return null;
   }
 
   return (
     <>
-      <h1>Bem vindo, {session.user?.name}</h1>
-      {session.user?.image && (
-        <Image
-          alt="Image Profile"
-          src={session.user.image}
-          width={50}
-          height={50}
-        />
-      )}
-      <p>
-        Você está autenticado como: {session.user?.email}, até:{" "}
-        {new Date(session.expires).toLocaleDateString("pt-BR", {
-          hour: "numeric",
-          minute: "numeric",
-          second: "numeric",
-        })}
-      </p>
-      <button onClick={() => signOut({ redirect: true, callbackUrl: "/" })}>
-        Sair
-      </button>
+      <Nav />
+      <main className="max-w-[1280px] p-4">
+        <div className="grid grid-cols-3 gap-4">
+          <Box>a</Box>
+          <Box>a</Box>
+          <Box>a</Box>
+        </div>
+      </main>
     </>
   );
 }

@@ -11,7 +11,7 @@ export default function Login() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  if (session) {
+  if (session?.user) {
     router.push("/dashboard");
     return null;
   }
@@ -33,14 +33,14 @@ export default function Login() {
               Comece a trilhar o caminho para o sucesso financeiro
             </p>
           </div>
-          <div className="flex flex-col max-md:gap-8 md:justify-between items-center relative md:before:content-[''] md:before:h-full md:before:border-[1px] md:before:absolute md:before:left-0">
+          <div className="flex flex-col max-md:gap-8 md:justify-between items-center relative md:before:content-[''] md:before:h-full md:before:border-[1px] md:before:border-gray-300 md:before:absolute md:before:left-0">
             <p className="text-center text-sm px-4 sm:px-10 md:px-20 lg:px-24 xl:px-24">
               Faça login no Economix e domine suas finanças com facilidade
             </p>
             <div className="flex flex-col gap-4">
               <button
                 onClick={() => signIn("facebook")}
-                className="border-2 rounded-full py-2 px-5 flex items-center gap-3"
+                className="border-2 border-gray-300 rounded-full py-2 px-5 flex items-center gap-3"
               >
                 <Image
                   src={facebookLogoImg}
@@ -52,7 +52,7 @@ export default function Login() {
               </button>
               <button
                 onClick={() => signIn("google")}
-                className="border-2 rounded-full py-2 px-5 flex items-center gap-3"
+                className="border-2 border-gray-300 rounded-full py-2 px-5 flex items-center gap-3"
               >
                 <Image
                   src={googleLogoImg}

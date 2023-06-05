@@ -5,12 +5,12 @@ interface BoxProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export const Box = ({ children, className, ...props }: BoxProps) => {
+export function Box({ children, className, ...props }: BoxProps) {
   return (
     <>
       <div
         className={clsx(
-          "bg-white dark:bg-gray-800 p-4 rounded-sm shadow-sm shadow-gray-300 dark:shadow-gray-900 dark:text-white",
+          "bg-white dark:bg-gray-800 p-4 rounded-sm shadow-sm shadow-gray-300 dark:shadow-gray-900",
           className
         )}
         {...props}
@@ -19,4 +19,4 @@ export const Box = ({ children, className, ...props }: BoxProps) => {
       </div>
     </>
   );
-};
+}
