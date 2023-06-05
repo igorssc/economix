@@ -1,21 +1,19 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function Dashboard() {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   if (status === "loading") {
     return <p>Carregando...</p>;
   }
 
   if (!session) {
-    return (
-      <>
-        <p>Você não está autenticado.</p>
-        <button onClick={() => signIn()}>Login com Google</button>
-      </>
-    );
+    router.push("/login");
+    return null;
   }
 
   return (
@@ -37,7 +35,9 @@ export default function Login() {
           second: "numeric",
         })}
       </p>
-      <button onClick={() => signOut()}>Sair</button>
+      <button onClick={() => signOut({ redirect: true, callbackUrl: "/" })}>
+        Sair
+      </button>
     </>
   );
 }

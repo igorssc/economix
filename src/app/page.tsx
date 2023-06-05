@@ -1,9 +1,6 @@
-import Link from "next/link";
+// "use client";
+import { Login } from "@/components/login";
 
-export default function Home() {
-  return (
-    <>
-      <Link href={"/login"}>Login</Link>
-    </>
-  );
+export default async function Home() {
+  return <Login />;
 }
