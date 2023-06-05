@@ -17,7 +17,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="pt-br">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-white dark:bg-gray-700`}>
         <AuthContext>{children}</AuthContext>
       </body>
     </html>
