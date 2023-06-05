@@ -9,12 +9,13 @@ import {
 
 export function MonthlyExpenses() {
   const data = [
-    { name: "Janeiro", value: 65 },
-    { name: "Fevereiro", value: 59 },
-    { name: "Março", value: 80 },
-    { name: "Abril", value: 81 },
-    { name: "Maio", value: 56 },
-    { name: "Junho", value: 55 },
+    { name: "Jan", value: 65 },
+    { name: "Fev", value: 59 },
+    { name: "Mar", value: 80 },
+    { name: "Abr", value: 81 },
+    { name: "Mai", value: 56 },
+    { name: "Jun", value: 55 },
+    { name: "Jul", value: 12 },
   ];
 
   const formatYAxisTick = (value: any, index: number) => {
@@ -38,11 +39,12 @@ export function MonthlyExpenses() {
         <XAxis
           dataKey="name"
           axisLine={{ display: "none" }}
-          tick={{ fill: "#d1d5db" }}
+          tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
           tickLine={{ display: "none" }}
+          interval="preserveStart"
         />
         <YAxis
-          tick={{ fill: "#d1d5db" }}
+          tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
           tickFormatter={formatYAxisTick}
           axisLine={{ display: "none" }}
           tickLine={{ display: "none" }}

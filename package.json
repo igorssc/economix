@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.13.4",
     "@phosphor-icons/react": "^2.0.9",
     "@radix-ui/react-avatar": "^1.0.3",
     "autoprefixer": "10.4.14",

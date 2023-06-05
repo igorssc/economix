@@ -27,11 +27,11 @@ export function SummarizedMonthlyExpensesIndex({
           )}
         />
         <p className={clsx("text-sm", invert && "md:text-right md:order-1")}>
-          <span className="md:text-lg">{title}</span>
+          <span className="md:text-lg max-md:font-bold">{title}</span>
           {description && (
             <>
               <br />
-              <span className="max-md:text-xs">{description}</span>
+              <span className="">{description}</span>
             </>
           )}
         </p>
