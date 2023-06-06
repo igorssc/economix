@@ -1,4 +1,5 @@
 import { NewRegister } from "@/components/NewRegister";
+import { Apollo } from "@/lib/apollo";
 
 export const metadata = {
   title: "EconomiX - Dashboard",
@@ -11,8 +12,10 @@ export default async function DashboardLayout({
 }) {
   return (
     <>
-      {children}
-      <NewRegister />
+      <Apollo>
+        {children}
+        <NewRegister />
+      </Apollo>
     </>
   );
 }

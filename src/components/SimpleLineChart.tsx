@@ -7,44 +7,56 @@ import {
   YAxis,
 } from "recharts";
 
-export function MonthlyExpenses() {
+export function SimpleLineChart() {
   const data = [
-    { name: "Jan", value: 65 },
-    { name: "Fev", value: 59 },
-    { name: "Mar", value: 80 },
-    { name: "Abr", value: 81 },
-    { name: "Mai", value: 56 },
-    { name: "Jun", value: 55 },
-    { name: "Jul", value: 12 },
+    { name: "Janeiro", value: 65 },
+    { name: "Fevereiro", value: 59 },
+    { name: "Março", value: -80 },
+    { name: "Abril", value: 81 },
+    { name: "Maio", value: 56 },
+    { name: "Junho", value: 55 },
+    { name: "Julho", value: 12 },
   ];
 
-  const formatYAxisTick = (value: any, index: number) => {
+  const formatXAxisTick = (value: string, _index: number) => {
+    return value.slice(0, 3);
+  };
+
+  const formatYAxisTick = (value: number, index: number) => {
     if (index === 0) {
       return "";
     }
-    return value;
+    return `R$ ${value.toFixed(2)}`;
   };
 
   const renderTooltipContent = (data: any) => {
     if (data.payload && data.payload.length > 0) {
-      const { value } = data.payload[0];
-      return <div>{value}</div>;
+      const { name, value } = data.payload[0].payload;
+      return (
+        <div className="text-xs">
+          {name}
+          <br />
+          R$ {value}
+        </div>
+      );
     }
     return null;
   };
 
   return (
-    <ResponsiveContainer width="100%" height={300} className="mt-6">
-      <AreaChart data={data} margin={{ left: -25, right: -25, top: 25 }}>
+    <ResponsiveContainer width="100%" height={250} className="mt-6">
+      <AreaChart data={data} margin={{ left: -50, right: 10, top: 0 }}>
         <XAxis
           dataKey="name"
           axisLine={{ display: "none" }}
           tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
           tickLine={{ display: "none" }}
           interval="preserveStart"
+          tickFormatter={formatXAxisTick}
         />
         <YAxis
           tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
+          display="none"
           tickFormatter={formatYAxisTick}
           axisLine={{ display: "none" }}
           tickLine={{ display: "none" }}
