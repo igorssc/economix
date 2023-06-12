@@ -1,4 +1,3 @@
-import { NewRegister } from "@/components/NewRegister";
 import { Apollo } from "@/lib/apollo";
 
 export const metadata = {
@@ -12,10 +11,7 @@ export default async function DashboardLayout({
 }) {
   return (
     <>
-      <Apollo>
-        {children}
-        <NewRegister />
-      </Apollo>
+      <Apollo>{children}</Apollo>
     </>
   );
 }

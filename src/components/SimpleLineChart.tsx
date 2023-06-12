@@ -63,7 +63,7 @@ export function SimpleLineChart() {
         />
         <defs>
           <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#030712" />
+            <stop offset="0%" stopColor="#2f8eec" />
             <stop offset="100%" stopColor="rgba(0, 123, 255, 0)" />
           </linearGradient>
         </defs>

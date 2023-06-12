@@ -4,11 +4,6 @@ export function Footer() {
   return (
     <>
       <div className="py-7 flex flex-col items-center gap-3 sm:gap-5 text-xs bg-gray-800">
-        <div className="flex gap-5">
-          <Link href="/privacy-policy">Política de privacidade</Link>
-          {"-"}
-          <Link href="/service-terms">Termos de serviço</Link>
-        </div>
         <p>
           Desenvolvido por{" "}
           <Link
@@ -19,6 +14,11 @@ export function Footer() {
             IGS DESIGN
           </Link>
         </p>
+        <div className="flex gap-2">
+          <Link href="/privacy-policy">Política de privacidade</Link>
+          {"|"}
+          <Link href="/service-terms">Termos de serviço</Link>
+        </div>
         <strong className="font-normal">
           © 2023 - {new Date().getFullYear()} - EconomiX
         </strong>
