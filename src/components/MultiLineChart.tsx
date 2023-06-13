@@ -1,3 +1,5 @@
+import { RecordContext } from "@/contexts/recordContext";
+import { useContext } from "react";
 import {
   Area,
   AreaChart,
@@ -8,18 +10,29 @@ import {
 } from "recharts";
 
 export function MultiLineChart() {
-  const data = [
-    { name: "Janeiro", value1: 65, value2: 80 },
-    { name: "Fevereiro", value1: 59, value2: 75 },
-    { name: "Março", value1: 80, value2: 85 },
-    { name: "Abril", value1: 81, value2: 78 },
-    { name: "Maio", value1: 56, value2: 70 },
-    { name: "Junho", value1: 55, value2: 68 },
-    { name: "Julho", value1: 12, value2: 30 },
-  ];
+  const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
+
+  const data = Array.from(
+    { length: allRecordsFromMonthsAgoByMonth.length },
+    (_, i) => {
+      return {
+        name: new Date(
+          new Date().setMonth(new Date().getMonth() - i)
+        ).toLocaleDateString("pt-br", { month: "long" }),
+        value1: allRecordsFromMonthsAgoByMonth[i].values.deposits.reduce(
+          (acc, v) => (acc += v.amount),
+          0
+        ),
+        value2: allRecordsFromMonthsAgoByMonth[i].values.withdraws.reduce(
+          (acc, v) => (acc += v.amount),
+          0
+        ),
+      };
+    }
+  ).reverse();
 
   const formatXAxisTick = (value: string, _index: number) => {
-    return value.slice(0, 3);
+    return value.charAt(0).toUpperCase() + value.slice(1, 3).toLowerCase();
   };
 
   const formatYAxisTick = (value: number, index: number) => {
@@ -36,9 +49,11 @@ export function MultiLineChart() {
         <div className="text-xs">
           {name}
           <br />
-          R$ {value1} (Depósitos)
+          R$ {value1.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
+          (Depósitos)
           <br />
-          R$ {value2} (Saques)
+          R$ {value2.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
+          (Saques)
         </div>
       );
     }

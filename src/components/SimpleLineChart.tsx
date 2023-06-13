@@ -36,7 +36,7 @@ export function SimpleLineChart() {
         <div className="text-xs">
           {name}
           <br />
-          R$ {value}
+          R$ {value.toLocaleString("pt-br", { minimumFractionDigits: 2 })}
         </div>
       );
     }

@@ -8,18 +8,52 @@ import { SimpleBarChart } from "@/components/SimpleBarChart";
 import { SimpleLineChart } from "@/components/SimpleLineChart";
 import { SimpleScatterChart } from "@/components/SimpleScatterChart";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
+import { RecordContext, RecordType } from "@/contexts/recordContext";
 import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { SnackbarProvider } from "notistack";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import onlineShoppingImg from "../../assets/online-shopping.png";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isOpenDialog, setIsOpenDialog] = useState(false);
+
+  const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
+
+  const [currentMonthRecords, setCurrentMonthRecords] = useState(
+    [] as RecordType[]
+  );
+
+  useEffect(() => {
+    setCurrentMonthRecords(
+      [
+        ...(allRecordsFromMonthsAgoByMonth.find((v) => v.monthAgo === 0)?.values
+          .deposits || []),
+        ...(allRecordsFromMonthsAgoByMonth.find((v) => v.monthAgo === 0)?.values
+          .withdraws || []),
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    );
+  }, [allRecordsFromMonthsAgoByMonth]);
+
+  const monthlyDepositValuesComparison =
+    (allRecordsFromMonthsAgoByMonth
+      .find((v) => v.monthAgo === 0)
+      ?.values.deposits.reduce((acc, v) => (acc += v.amount), 0) || 0) -
+    (allRecordsFromMonthsAgoByMonth
+      .find((v) => v.monthAgo === 1)
+      ?.values.deposits.reduce((acc, v) => (acc += v.amount), 0) || 0);
+
+  const monthlyWithdrawValuesComparison =
+    (allRecordsFromMonthsAgoByMonth
+      .find((v) => v.monthAgo === 0)
+      ?.values.withdraws.reduce((acc, v) => (acc += v.amount), 0) || 0) -
+    (allRecordsFromMonthsAgoByMonth
+      .find((v) => v.monthAgo === 1)
+      ?.values.withdraws.reduce((acc, v) => (acc += v.amount), 0) || 0);
 
   if (status === "loading") {
     return <>Carregando...</>;
@@ -42,18 +76,40 @@ export default function Dashboard() {
             <p className="text-center">
               Seus gastos esse mês já somam:
               <br />
-              <span className="font-bold text-2xl">R$ 1.200,00</span>
+              <span className="font-bold text-2xl">
+                R${" "}
+                {allRecordsFromMonthsAgoByMonth
+                  .find((v) => v.monthAgo === 0)
+                  ?.values.withdraws.reduce((acc, v) => acc + v.amount, 0)
+                  .toLocaleString("pt-br", { minimumFractionDigits: 2 })}
+              </span>
             </p>
 
             <div className="flex justify-center gap-10">
               <SummarizedMonthlyExpensesIndex
-                title="R$ 120,00"
-                description="Acima do mês anterior"
+                title={Math.abs(monthlyDepositValuesComparison).toLocaleString(
+                  "pt-br",
+                  {
+                    style: "currency",
+                    currency: "BRL",
+                  }
+                )}
+                description={`${
+                  monthlyDepositValuesComparison > 0 ? "Acima" : "Abaixo"
+                } do mês anterior`}
                 _icon={ArrowUp}
               />
               <SummarizedMonthlyExpensesIndex
-                title="R$ 120,00"
-                description="Acima do mês anterior"
+                title={Math.abs(monthlyWithdrawValuesComparison).toLocaleString(
+                  "pt-br",
+                  {
+                    style: "currency",
+                    currency: "BRL",
+                  }
+                )}
+                description={`${
+                  monthlyWithdrawValuesComparison > 0 ? "Acima" : "Abaixo"
+                } do mês anterior`}
                 _icon={ArrowDown}
                 invert
               />
@@ -103,102 +159,21 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
-                    <tr>
-                      <th scope="row">Apple MacBook Pro 17</th>
-                      <td>Silver</td>
-                      <td>Laptop</td>
-                      <td>$2999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>White</td>
-                      <td>Laptop PC</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>Black</td>
-                      <td>Accessories</td>
-                      <td>$99</td>
-                    </tr>
+                    {currentMonthRecords.map((v) => (
+                      <tr key={v.id}>
+                        <th scope="row">{v.title}</th>
+                        <td>
+                          {v.category === "deposit" ? "Depósito" : "Retirada"}
+                        </td>
+                        <td>
+                          {v.amount?.toLocaleString("pt-br", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                        </td>
+                        <td>{new Date(v.date).toLocaleDateString("pt-br")}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
-export const GET_ALL_RECORDS = gql`
-  query Records($email: String!) {
-    records(where: { email: $email }) {
+export const GET_UNIQUE_RECORD = gql`
+  query Record($id: String!) {
+    record(where: { id: $id }) {
       id
       title
       category
@@ -13,13 +13,13 @@ export const GET_ALL_RECORDS = gql`
   }
 `;
 
-export interface getAllRecordsQueryResponse {
-  records: {
+export interface getUniqueRecordQueryResponse {
+  record: {
     id: string;
     title: string;
     category: string;
     amount: number;
     description?: string;
     date: string;
-  }[];
+  };
 }

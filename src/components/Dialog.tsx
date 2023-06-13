@@ -57,6 +57,54 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
 
   const {} = useContext(RecordContext);
 
+  const handleSubmit = () => {
+    if (!title) {
+      enqueueSnackbar("Insira um título válido, por favor!", {
+        variant: "warning",
+      });
+
+      return;
+    }
+
+    if (!amount) {
+      enqueueSnackbar("Insira um valor válido, por favor!", {
+        variant: "warning",
+      });
+
+      return;
+    }
+
+    if (!date) {
+      enqueueSnackbar("Insira uma data válida, por favor!", {
+        variant: "warning",
+      });
+
+      return;
+    }
+    try {
+      createRecord({
+        title,
+        category,
+        amount: +amount,
+        description,
+        date: new Date(date).toISOString(),
+      });
+    } catch {
+      enqueueSnackbar("Houve um erro! Tente novamente, por favor!", {
+        variant: "error",
+      });
+
+      return;
+    }
+    setTitle("");
+    setCategory("");
+    setDescription("");
+    setAmount(undefined);
+
+    handleClose();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
       <DialogMui open={open} onClose={handleClose}>
@@ -131,51 +179,7 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
           <Button autoFocus onClick={handleClose} scheme="secondary" isSmall>
             Cancelar
           </Button>
-          <Button
-            onClick={() => {
-              console.log({
-                title,
-                category,
-                amount,
-                description,
-                date,
-              });
-
-              if (!title) {
-                enqueueSnackbar("Insira um título válido, por favor!", {
-                  variant: "warning",
-                });
-
-                return;
-              }
-
-              if (!amount) {
-                enqueueSnackbar("Insira um valor válido, por favor!", {
-                  variant: "warning",
-                });
-
-                return;
-              }
-
-              if (!date) {
-                enqueueSnackbar("Insira uma data válida, por favor!", {
-                  variant: "warning",
-                });
-
-                return;
-              }
-              createRecord({
-                title,
-                category,
-                amount: +amount,
-                description,
-                date: new Date(date).toISOString(),
-              });
-              handleClose();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            isSmall
-          >
+          <Button onClick={handleSubmit} isSmall>
             Confirmar
           </Button>
         </DialogActions>
