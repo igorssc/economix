@@ -1,3 +1,4 @@
+import { RecordContext } from "@/contexts/recordContext";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -8,7 +9,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Button } from "./Button";
 
 interface DialogPropsRestart {
@@ -16,7 +17,7 @@ interface DialogPropsRestart {
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const getCurrentDateTime = () => {
+const getCurrentDateTimeString = () => {
   const now = new Date();
   const year = now.getFullYear();
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -27,14 +28,32 @@ const getCurrentDateTime = () => {
   return `${year}-${month}-${day}T${hour}:${minute}`;
 };
 
-const DialogCreateRegister = ({ open, setOpen }: DialogPropsRestart) => {
+function convertStringToDate(dateTimeString: string): Date {
+  const [datePart, timePart] = dateTimeString.split("T");
+  const [year, month, day] = datePart.split("-");
+  const [hour, minute] = timePart.split(":");
+
+  return new Date(
+    parseInt(year),
+    parseInt(month) - 1,
+    parseInt(day),
+    parseInt(hour),
+    parseInt(minute)
+  );
+}
+
+export function Dialog({ open, setOpen }: DialogPropsRestart) {
+  const { createRecord } = useContext(RecordContext);
+
   const [title, setTitle] = useState<string>();
   const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState<number | string>();
   const [description, setDescription] = useState<string>();
-  const [date, setDate] = useState(getCurrentDateTime());
+  const [date, setDate] = useState(getCurrentDateTimeString());
 
   const handleClose = () => setOpen(false);
+
+  const {} = useContext(RecordContext);
 
   return (
     <>
@@ -47,6 +66,8 @@ const DialogCreateRegister = ({ open, setOpen }: DialogPropsRestart) => {
             label="Título"
             type="text"
             fullWidth
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             variant="standard"
           />
           <TextField
@@ -98,7 +119,10 @@ const DialogCreateRegister = ({ open, setOpen }: DialogPropsRestart) => {
             fullWidth
             variant="standard"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              setDate(e.target.value),
+                alert(convertStringToDate(e.target.value));
+            }}
           />
         </DialogContent>
         <DialogActions>
@@ -114,6 +138,13 @@ const DialogCreateRegister = ({ open, setOpen }: DialogPropsRestart) => {
                 description,
                 date,
               });
+              createRecord({
+                title,
+                category,
+                amount: +amount,
+                description,
+                date: new Date(date),
+              });
               handleClose();
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
@@ -125,8 +156,4 @@ const DialogCreateRegister = ({ open, setOpen }: DialogPropsRestart) => {
       </DialogMui>
     </>
   );
-};
-
-export const Dialog = {
-  Register: DialogCreateRegister,
-};
+}

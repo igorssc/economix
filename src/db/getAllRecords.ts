@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
-export const GET_ALL_REGISTERS = gql`
-  query Registers {
-    registers {
+export const GET_ALL_RECORDS = gql`
+  query Records {
+    records {
       createdAt
       id
       email
@@ -14,8 +14,8 @@ export const GET_ALL_REGISTERS = gql`
   }
 `;
 
-export interface getAllRegistersQueryResponse {
-  registers: {
+export interface getAllRecordsQueryResponse {
+  records: {
     createdAt: string;
     id: string;
     email: string;

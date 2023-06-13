@@ -1,5 +1,7 @@
 import { Footer } from "@/components/Footer";
 import AuthContext from "@/contexts/authContext";
+import { RecordProvider } from "@/contexts/recordContext";
+import { Apollo } from "@/lib/apollo";
 import { Inter } from "next/font/google";
 import "../style/globals.css";
 
@@ -19,12 +21,16 @@ export default async function RootLayout({
   return (
     <html lang="pt-br">
       <AuthContext>
-        <body
-          className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300 relative`}
-        >
-          {children}
-          <Footer />
-        </body>
+        <Apollo>
+          <RecordProvider>
+            <body
+              className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300 relative`}
+            >
+              {children}
+              <Footer />
+            </body>
+          </RecordProvider>
+        </Apollo>
       </AuthContext>
     </html>
   );

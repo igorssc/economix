@@ -8,7 +8,6 @@ import { SimpleBarChart } from "@/components/SimpleBarChart";
 import { SimpleLineChart } from "@/components/SimpleLineChart";
 import { SimpleScatterChart } from "@/components/SimpleScatterChart";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
-import { Search } from "@/components/search";
 import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -33,9 +32,8 @@ export default function Dashboard() {
   return (
     <>
       <Nav />
-      <Search />
       <NewRegister onClick={() => setIsOpenDialog(true)} />
-      <Dialog.Register open={isOpenDialog} setOpen={setIsOpenDialog} />
+      <Dialog open={isOpenDialog} setOpen={setIsOpenDialog} />
 
       <main className="max-w-[1280px] p-4 m-auto">
         <div className="flex flex-col gap-8 justify-center items-center">
@@ -87,9 +85,9 @@ export default function Dashboard() {
             <h1 className="text-center">Lucro mensal</h1>
             <SimpleLineChart />
           </Box>
-          <div className="col-span-6">
+          <Box className="col-span-6">
             <SimpleScatterChart />
-          </div>
+          </Box>
 
           <Box className="sm:col-span-6 md:col-span-3 max-md:order-2">
             <div className="relative overflow-x-auto">
