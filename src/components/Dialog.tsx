@@ -169,7 +169,7 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
                 category,
                 amount: +amount,
                 description,
-                date: new Date(date).toDateString(),
+                date: new Date(date).toISOString(),
               });
               handleClose();
               window.scrollTo({ top: 0, behavior: "smooth" });
