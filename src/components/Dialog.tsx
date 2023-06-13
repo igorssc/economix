@@ -9,6 +9,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import { useSnackbar } from "notistack";
 import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Button } from "./Button";
 
@@ -44,6 +45,7 @@ function convertStringToDate(dateTimeString: string): Date {
 
 export function Dialog({ open, setOpen }: DialogPropsRestart) {
   const { createRecord } = useContext(RecordContext);
+  const { enqueueSnackbar } = useSnackbar();
 
   const [title, setTitle] = useState<string>();
   const [category, setCategory] = useState<string>("");
@@ -138,12 +140,36 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
                 description,
                 date,
               });
+
+              if (!title) {
+                enqueueSnackbar("Insira um título válido, por favor!", {
+                  variant: "warning",
+                });
+
+                return;
+              }
+
+              if (!amount) {
+                enqueueSnackbar("Insira um valor válido, por favor!", {
+                  variant: "warning",
+                });
+
+                return;
+              }
+
+              if (!date) {
+                enqueueSnackbar("Insira uma data válida, por favor!", {
+                  variant: "warning",
+                });
+
+                return;
+              }
               createRecord({
                 title,
                 category,
                 amount: +amount,
                 description,
-                date: new Date(date),
+                date: new Date(date).toDateString(),
               });
               handleClose();
               window.scrollTo({ top: 0, behavior: "smooth" });

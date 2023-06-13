@@ -28,7 +28,7 @@ type RecordData = {
     title: string;
     category: string;
     amount: number;
-    description: string;
+    description?: string;
     date: string;
   }) => Promise<void>;
 };
@@ -57,7 +57,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
     title: string;
     category: string;
     amount: number;
-    description: string;
+    description?: string;
     date: string;
   }) => {
     try {

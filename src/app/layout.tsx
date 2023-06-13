@@ -3,6 +3,7 @@ import AuthContext from "@/contexts/authContext";
 import { RecordProvider } from "@/contexts/recordContext";
 import { Apollo } from "@/lib/apollo";
 import { Inter } from "next/font/google";
+import { SnackbarProvider } from "notistack";
 import "../style/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -23,12 +24,14 @@ export default async function RootLayout({
       <AuthContext>
         <Apollo>
           <RecordProvider>
-            <body
-              className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300 relative`}
-            >
-              {children}
-              <Footer />
-            </body>
+            <SnackbarProvider maxSnack={3}>
+              <body
+                className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300 relative`}
+              >
+                {children}
+                <Footer />
+              </body>
+            </SnackbarProvider>
           </RecordProvider>
         </Apollo>
       </AuthContext>
