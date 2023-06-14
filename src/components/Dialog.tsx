@@ -44,7 +44,7 @@ function convertStringToDate(dateTimeString: string): Date {
 }
 
 export function Dialog({ open, setOpen }: DialogPropsRestart) {
-  const { createRecord } = useContext(RecordContext);
+  const { createRecord, refetchData } = useContext(RecordContext);
   const { enqueueSnackbar } = useSnackbar();
 
   const [title, setTitle] = useState<string>();
@@ -57,9 +57,19 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
 
   const {} = useContext(RecordContext);
 
-  const handleSubmit = () => {
+  const [isButtonDisabled, serIsButtonDisabled] = useState(false);
+
+  const handleSubmit = async () => {
     if (!title) {
       enqueueSnackbar("Insira um título válido, por favor!", {
+        variant: "warning",
+      });
+
+      return;
+    }
+
+    if (!category) {
+      enqueueSnackbar("Insira uma categoria válida, por favor!", {
         variant: "warning",
       });
 
@@ -81,11 +91,14 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
 
       return;
     }
+
+    serIsButtonDisabled(true);
+
     try {
-      createRecord({
+      await createRecord({
         title,
         category,
-        amount: +amount,
+        amount: +String(amount).replace(/\./g, "").replace(/\,/g, "."),
         description,
         date: new Date(date).toISOString(),
       });
@@ -95,7 +108,10 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
       });
 
       return;
+    } finally {
+      serIsButtonDisabled(false);
     }
+
     setTitle("");
     setCategory("");
     setDescription("");
@@ -143,9 +159,25 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
             <InputLabel htmlFor="amount">Valor</InputLabel>
             <Input
               id="amount"
-              type="number"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+
+                const floatValue =
+                  String(+cleanedValue).length > 3
+                    ? String(+cleanedValue)
+                    : ("000" + String(+cleanedValue)).slice(-3);
+
+                const formatted =
+                  floatValue.slice(0, -2) + "." + floatValue.slice(-2);
+
+                setAmount(
+                  parseFloat(formatted).toLocaleString("pt-br", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                );
+              }}
               startAdornment={
                 <InputAdornment position="start">R$</InputAdornment>
               }
@@ -170,8 +202,7 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
             variant="standard"
             value={date}
             onChange={(e) => {
-              setDate(e.target.value),
-                alert(convertStringToDate(e.target.value));
+              setDate(e.target.value);
             }}
           />
         </DialogContent>
@@ -179,7 +210,7 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
           <Button autoFocus onClick={handleClose} scheme="secondary" isSmall>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} isSmall>
+          <Button onClick={handleSubmit} isSmall disabled={isButtonDisabled}>
             Confirmar
           </Button>
         </DialogActions>

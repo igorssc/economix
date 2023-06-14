@@ -1,6 +1,6 @@
 import { RecordContext } from "@/contexts/recordContext";
 import { formatDistanceStrict } from "date-fns";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   Scatter,
@@ -11,37 +11,62 @@ import {
 } from "recharts";
 
 export function SimpleScatterChart() {
-  const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
+  const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
 
-  const [dataWithdraw, setDataWithdraw] = useState(
-    Array.from({ length: 30 }, (_, i) => {
-      return [] as { x: number; y: number }[];
-    }).reverse()
+  const [dataWithdraws, setDataWithdraws] = useState(
+    [] as { x: number; y: number }[]
   );
 
-  allRecordsFromMonthsAgoByMonth
-    .find((v) => v.monthAgo === 0)
-    ?.values.withdraws.forEach((v) => {
+  const [dataDeposits, setDataDeposits] = useState(
+    [] as { x: number; y: number }[]
+  );
+
+  useEffect(() => {
+    allRecordsFrom30DaysAgo.forEach((v) => {
       const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
         unit: "day",
         addSuffix: false,
       }).split(" ")[0];
-    });
 
-  const data = [
-    { x: 1, y: 200 },
-    { x: 3, y: 100 },
-    { x: 6, y: 300 },
-    { x: 9, y: 250 },
-    { x: 12, y: 450 },
-    { x: 15, y: 280 },
-  ];
+      if (v.category === "deposit") {
+        setDataDeposits((prev) => [
+          ...prev,
+          {
+            x: distance,
+            y:
+              new Date(v.date).getHours() * 60 * 60 +
+              new Date(v.date).getMinutes() * 60,
+          },
+        ]);
+      } else {
+        setDataWithdraws((prev) => [
+          ...prev,
+          {
+            x: distance,
+            y:
+              new Date(v.date).getHours() * 60 * 60 +
+              new Date(v.date).getMinutes() * 60,
+          },
+        ]);
+      }
+    });
+  }, [allRecordsFrom30DaysAgo]);
 
   const formatYAxisTick = (value: any, index: number) => {
     if (index === 0) {
       return "";
     }
-    return value;
+    return (value / 60 / 60 === 24 ? "00" : value / 60 / 60) + ":00";
+  };
+
+  const formatXAxisTick = (value: any, index: number) => {
+    if (new Date().getDate() - value <= 30) {
+      return new Date(
+        new Date().setDate(new Date().getDate() - value)
+      ).toLocaleDateString("pt-br", { day: "2-digit", month: "2-digit" });
+    }
+
+    return "";
   };
 
   const renderTooltipContent = (data: any) => {
@@ -49,9 +74,15 @@ export function SimpleScatterChart() {
       const { x, y } = data.payload[0].payload;
       return (
         <div className="text-xs">
-          {`Dia ${x}`}
+          {new Date(
+            new Date().setDate(new Date().getDate() - x)
+          ).toLocaleDateString("pt-br", { day: "2-digit", month: "2-digit" })}
           <br />
-          {`Horas do dia: ${y}`}
+          {("00" + Math.floor(y / 60 / 60)).slice(-2) +
+            ":" +
+            (
+              "00" + Math.floor((y / 60 / 60 - Math.floor(y / 60 / 60)) * 60)
+            ).slice(-2)}
         </div>
       );
     }
@@ -60,14 +91,17 @@ export function SimpleScatterChart() {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <ScatterChart margin={{ left: -30, right: 0, top: 10 }}>
+      <ScatterChart margin={{ left: -25, right: 10, top: 10 }}>
         <XAxis
           type="number"
           dataKey="x"
           name="Dia"
+          reversed
           tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
           axisLine={{ display: "none" }}
           tickLine={{ display: "none" }}
+          tickFormatter={formatXAxisTick}
+          interval="preserveStartEnd"
         />
         <YAxis
           type="number"
@@ -77,13 +111,14 @@ export function SimpleScatterChart() {
           axisLine={{ display: "none" }}
           tickLine={{ display: "none" }}
           tickFormatter={formatYAxisTick}
+          ticks={[0, 14400, 28800, 43200, 57600, 72000, 86400]}
         />
         <Tooltip
           cursor={{ strokeDasharray: "3 3" }}
           content={renderTooltipContent}
         />
-        <Scatter data={data} fill="#2f8eec" />
-        <Scatter data={dataWithdraw} fill="#ec4e2f" />
+        <Scatter data={dataDeposits} fill="#2f8eec" />
+        <Scatter data={dataWithdraws} fill="#ec4e2f" />
       </ScatterChart>
     </ResponsiveContainer>
   );

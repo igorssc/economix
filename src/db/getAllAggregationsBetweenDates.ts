@@ -1,20 +1,14 @@
 import { gql } from "@apollo/client";
 
-export const GET_ALL_AGGREGATIONS_BETWEEN_DATES_BY_CATEGORY = gql`
+export const GET_ALL_AGGREGATIONS_BETWEEN_DATES = gql`
   query Records(
     $email: String!
-    $category: String!
     $skip: Int!
     $dateGTE: DateTime!
     $dateLTE: DateTime!
   ) {
     recordsConnection(
-      where: {
-        email: $email
-        category: $category
-        date_gte: $dateGTE
-        date_lte: $dateLTE
-      }
+      where: { email: $email, date_gte: $dateGTE, date_lte: $dateLTE }
       skip: $skip
       orderBy: date_DESC
     ) {
@@ -35,7 +29,7 @@ export const GET_ALL_AGGREGATIONS_BETWEEN_DATES_BY_CATEGORY = gql`
   }
 `;
 
-export interface getAllAggregationsBetweenDatesByCategoryQueryResponse {
+export interface getAllAggregationsBetweenDatesQueryResponse {
   recordsConnection: {
     pageInfo: {
       hasNextPage: boolean;

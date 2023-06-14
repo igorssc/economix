@@ -8,7 +8,7 @@ import { SimpleBarChart } from "@/components/SimpleBarChart";
 import { SimpleLineChart } from "@/components/SimpleLineChart";
 import { SimpleScatterChart } from "@/components/SimpleScatterChart";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
-import { RecordContext, RecordType } from "@/contexts/recordContext";
+import { RecordContext } from "@/contexts/recordContext";
 import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -22,22 +22,12 @@ export default function Dashboard() {
   const router = useRouter();
   const [isOpenDialog, setIsOpenDialog] = useState(false);
 
-  const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
-
-  const [currentMonthRecords, setCurrentMonthRecords] = useState(
-    [] as RecordType[]
-  );
-
-  useEffect(() => {
-    setCurrentMonthRecords(
-      [
-        ...(allRecordsFromMonthsAgoByMonth.find((v) => v.monthAgo === 0)?.values
-          .deposits || []),
-        ...(allRecordsFromMonthsAgoByMonth.find((v) => v.monthAgo === 0)?.values
-          .withdraws || []),
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    );
-  }, [allRecordsFromMonthsAgoByMonth]);
+  const {
+    allRecordsFromMonthsAgoByMonth,
+    allRecordsFrom30DaysAgo,
+    countAllQuantitiesAndAmountOf30DaysAgoByTitle,
+    allRecordsInFuture,
+  } = useContext(RecordContext);
 
   const monthlyDepositValuesComparison =
     (allRecordsFromMonthsAgoByMonth
@@ -54,6 +44,23 @@ export default function Dashboard() {
     (allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 1)
       ?.values.withdraws.reduce((acc, v) => (acc += v.amount), 0) || 0);
+
+  const [highestExpenseInTheLast30Days, setHighestExpenseInTheLast30Days] =
+    useState(
+      {} as {
+        title: string;
+        quantity: number;
+        totalAmount: number;
+      }
+    );
+
+  useEffect(() => {
+    setHighestExpenseInTheLast30Days(
+      countAllQuantitiesAndAmountOf30DaysAgoByTitle.sort(
+        (a, b) => b.totalAmount - a.totalAmount
+      )[0]
+    );
+  }, [countAllQuantitiesAndAmountOf30DaysAgoByTitle]);
 
   if (status === "loading") {
     return <>Carregando...</>;
@@ -128,13 +135,22 @@ export default function Dashboard() {
               <h1 className="text-lg font-bold">
                 <span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-[#2f8eec] relative inline-block">
                   <span className="relative text-white uppercase">
-                    Supermercado
+                    {highestExpenseInTheLast30Days?.title || ""}
                   </span>
                 </span>
               </h1>
               <p className="text-center">
-                foi o gasto que você mais teve nos últimos 30 dias, totalizando
-                R$ 1.300,00
+                Foi o gasto que você mais teve nos últimos 30 dias,{" "}
+                {highestExpenseInTheLast30Days?.quantity || 0} vez
+                {highestExpenseInTheLast30Days?.quantity > 1 ? "es" : ""},
+                totalizando{" "}
+                {highestExpenseInTheLast30Days?.totalAmount?.toLocaleString(
+                  "pt-br",
+                  {
+                    style: "currency",
+                    currency: "BRL",
+                  }
+                ) || "R$ 00.00"}
               </p>
             </Box>
             <Box className="sm:col-span-3 md:col-span-2">
@@ -161,7 +177,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
-                    {currentMonthRecords.map((v) => (
+                    {allRecordsFrom30DaysAgo.map((v) => (
                       <tr key={v.id}>
                         <th scope="row">{v.title}</th>
                         <td>
@@ -173,78 +189,90 @@ export default function Dashboard() {
                             currency: "BRL",
                           })}
                         </td>
-                        <td>{new Date(v.date).toLocaleDateString("pt-br")}</td>
+                        <td>
+                          {new Date(v.date).toLocaleDateString("pt-br", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </Box>
-            <Box className="sm:col-span-6 md:col-span-3 max-md:order-1">
-              <div className="relative overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
-                    <tr className="[&_th]:px-6 [&_th]:py-3">
-                      <th scope="col">Categoria</th>
-                      <th scope="col">Quantidade</th>
-                      <th scope="col">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
-                    <tr>
-                      <th scope="row">Apple MacBook Pro 17</th>
-                      <td>12</td>
-                      <td>$2999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Microsoft Surface Pro</th>
-                      <td>12</td>
-                      <td>$1999</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magic Mouse 2</th>
-                      <td>12</td>
-                      <td>$99</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </Box>
+            <div className="sm:col-span-6 md:col-span-3 max-md:order-1 flex flex-col gap-4">
+              <Box className="">
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
+                      <tr className="[&_th]:px-6 [&_th]:py-3">
+                        <th scope="col">Título</th>
+                        <th scope="col">Categoria</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Data</th>
+                      </tr>
+                    </thead>
+                    <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
+                      {allRecordsInFuture.map((value, index) => (
+                        <tr key={index}>
+                          <th scope="row">{value.title}</th>
+                          <td>
+                            {value.category === "deposit"
+                              ? "Depósito"
+                              : "Retirada"}
+                          </td>
+                          <td>
+                            {value.amount?.toLocaleString("pt-br", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </td>
+                          <td>
+                            {new Date(value.date).toLocaleDateString("pt-br", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Box>
+              <Box className="">
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
+                      <tr className="[&_th]:px-6 [&_th]:py-3">
+                        <th scope="col">Título</th>
+                        <th scope="col">Quantidade</th>
+                        <th scope="col">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
+                      {countAllQuantitiesAndAmountOf30DaysAgoByTitle.map(
+                        (value, index) => (
+                          <tr key={index}>
+                            <th scope="row">
+                              {value.title.charAt(0).toUpperCase() +
+                                value.title.slice(1).toLowerCase()}
+                            </th>
+                            <td>{value.quantity}</td>
+                            <td>
+                              {value.totalAmount?.toLocaleString("pt-br", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Box>
+            </div>
           </div>
         </main>
       </SnackbarProvider>

@@ -102,7 +102,7 @@ export function MultiLineChart() {
 
   return (
     <ResponsiveContainer width="100%" height={250} className="mt-6">
-      <AreaChart data={data} margin={{ left: -50, right: 10, top: 0 }}>
+      <AreaChart data={data} margin={{ left: -50, right: 10, top: 10 }}>
         <XAxis
           dataKey="name"
           axisLine={{ display: "none" }}
