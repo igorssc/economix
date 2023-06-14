@@ -69,12 +69,10 @@ export function RecordProvider({ children }: RecordProviderProps) {
   const [publishRegisterMutateFunction] =
     useMutation<publishRecordMutationResponse>(PUBLISH_RECORD);
 
-  const {
-    data: _dataGetAllRecordsFromMonthsAgoByCategory,
-    refetch: refetchGetAllRecordsFromMonthsAgoByCategory,
-  } = useQuery<getAllAggregationsBetweenDatesByCategoryQueryResponse>(
-    GET_ALL_AGGREGATIONS_BETWEEN_DATES_BY_CATEGORY
-  );
+  const { refetch: refetchGetAllRecordsFromMonthsAgoByCategory } =
+    useQuery<getAllAggregationsBetweenDatesByCategoryQueryResponse>(
+      GET_ALL_AGGREGATIONS_BETWEEN_DATES_BY_CATEGORY
+    );
 
   const [
     countAllRecordsFromMonthsAgoByCategory,
@@ -140,7 +138,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
             skipD += 10;
 
-            if (!r.data.recordsConnection.pageInfo.hasNextPage) {
+            if (!r.data?.recordsConnection.pageInfo.hasNextPage) {
               clearIntervalAsync(intervalD);
             }
           });
@@ -170,7 +168,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
             skipW += 10;
 
-            if (!r.data.recordsConnection.pageInfo.hasNextPage) {
+            if (!r.data?.recordsConnection.pageInfo.hasNextPage) {
               clearIntervalAsync(intervalW);
             }
           });
