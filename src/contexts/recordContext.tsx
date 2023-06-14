@@ -123,13 +123,13 @@ export function RecordProvider({ children }: RecordProviderProps) {
             dateGTE: getISODateOfMonthsAgo(i),
             dateLTE: getISODateOfMonthsAgo(i, true),
             skip: skipD,
-          }).then((r) => {
+          }).then((result) => {
             setAllRecordsFromMonthsAgoByCategory((prev) => {
               return {
                 withdraws: [...prev.withdraws],
                 deposits: [
                   ...prev.deposits,
-                  ...r.data.recordsConnection.edges.map(
+                  ...result.data.recordsConnection.edges.map(
                     (v) => v.node as RecordType
                   ),
                 ],
@@ -138,7 +138,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
             skipD += 10;
 
-            if (!r.data?.recordsConnection.pageInfo.hasNextPage) {
+            if (!result.data.recordsConnection.pageInfo.hasNextPage) {
               clearIntervalAsync(intervalD);
             }
           });
@@ -153,13 +153,13 @@ export function RecordProvider({ children }: RecordProviderProps) {
             dateGTE: getISODateOfMonthsAgo(i),
             dateLTE: getISODateOfMonthsAgo(i, true),
             skip: skipW,
-          }).then((r) => {
+          }).then((result) => {
             setAllRecordsFromMonthsAgoByCategory((prev) => {
               return {
                 deposits: [...prev.deposits],
                 withdraws: [
                   ...prev.withdraws,
-                  ...r.data.recordsConnection.edges.map(
+                  ...result.data.recordsConnection.edges.map(
                     (v) => v.node as RecordType
                   ),
                 ],
@@ -168,7 +168,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
             skipW += 10;
 
-            if (!r.data?.recordsConnection.pageInfo.hasNextPage) {
+            if (!result.data.recordsConnection.pageInfo.hasNextPage) {
               clearIntervalAsync(intervalW);
             }
           });
