@@ -95,9 +95,9 @@ export default function Dashboard() {
                   }
                 )}
                 description={`${
-                  monthlyDepositValuesComparison > 0 ? "Acima" : "Abaixo"
-                } do mês anterior`}
-                _icon={ArrowUp}
+                  monthlyDepositValuesComparison > 0 ? "A mais" : "A menos"
+                } de depósitos este mês`}
+                _icon={monthlyDepositValuesComparison > 0 ? ArrowUp : ArrowDown}
               />
               <SummarizedMonthlyExpensesIndex
                 title={Math.abs(monthlyWithdrawValuesComparison).toLocaleString(
@@ -108,9 +108,11 @@ export default function Dashboard() {
                   }
                 )}
                 description={`${
-                  monthlyWithdrawValuesComparison > 0 ? "Acima" : "Abaixo"
-                } do mês anterior`}
-                _icon={ArrowDown}
+                  monthlyWithdrawValuesComparison > 0 ? "A mais" : "A menos"
+                } de retiradas este mês`}
+                _icon={
+                  monthlyWithdrawValuesComparison > 0 ? ArrowUp : ArrowDown
+                }
                 invert
               />
             </div>
@@ -136,7 +138,7 @@ export default function Dashboard() {
               </p>
             </Box>
             <Box className="sm:col-span-3 md:col-span-2">
-              <h1 className="text-center">Lucro mensal</h1>
+              <h1 className="text-center">Quantidade de gastos mensais</h1>
               <SimpleBarChart />
             </Box>
             <Box className="sm:col-span-3 md:col-span-2">

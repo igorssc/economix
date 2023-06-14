@@ -47,7 +47,7 @@ export function MultiLineChart() {
       const { name, value1, value2 } = data.payload[0].payload;
       return (
         <div className="text-xs">
-          {name}
+          {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
           <br />
           R$ {value1.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
           (Depósitos)

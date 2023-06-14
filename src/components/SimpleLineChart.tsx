@@ -1,3 +1,5 @@
+import { RecordContext } from "@/contexts/recordContext";
+import { useContext } from "react";
 import {
   Area,
   AreaChart,
@@ -8,18 +10,30 @@ import {
 } from "recharts";
 
 export function SimpleLineChart() {
-  const data = [
-    { name: "Janeiro", value: 65 },
-    { name: "Fevereiro", value: 59 },
-    { name: "Março", value: -80 },
-    { name: "Abril", value: 81 },
-    { name: "Maio", value: 56 },
-    { name: "Junho", value: 55 },
-    { name: "Julho", value: 12 },
-  ];
+  const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
+
+  const data = Array.from(
+    { length: Math.floor(allRecordsFromMonthsAgoByMonth.length / 2) },
+    (_, i) => {
+      return {
+        name: new Date(
+          new Date().setMonth(new Date().getMonth() - i)
+        ).toLocaleDateString("pt-br", { month: "long" }),
+        value:
+          allRecordsFromMonthsAgoByMonth[i].values.deposits.reduce(
+            (acc, v) => (acc += v.amount),
+            0
+          ) -
+          allRecordsFromMonthsAgoByMonth[i].values.withdraws.reduce(
+            (acc, v) => (acc += v.amount),
+            0
+          ),
+      };
+    }
+  ).reverse();
 
   const formatXAxisTick = (value: string, _index: number) => {
-    return value.slice(0, 3);
+    return value.charAt(0).toUpperCase() + value.slice(1, 3).toLowerCase();
   };
 
   const formatYAxisTick = (value: number, index: number) => {
@@ -34,7 +48,7 @@ export function SimpleLineChart() {
       const { name, value } = data.payload[0].payload;
       return (
         <div className="text-xs">
-          {name}
+          {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
           <br />
           R$ {value.toLocaleString("pt-br", { minimumFractionDigits: 2 })}
         </div>
