@@ -162,10 +162,12 @@ export default function Dashboard() {
               <SimpleLineChart />
             </Box>
             <Box className="col-span-6">
+              <h1 className="text-center">Registros - Dia x Hora</h1>
               <SimpleScatterChart />
             </Box>
 
             <Box className="sm:col-span-6 md:col-span-3 max-md:order-2">
+              <h1 className="text-center mb-4">Útimos registros</h1>
               <div className="relative overflow-x-auto">
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
@@ -203,6 +205,7 @@ export default function Dashboard() {
             </Box>
             <div className="sm:col-span-6 md:col-span-3 max-md:order-1 flex flex-col gap-4">
               <Box className="">
+                <h1 className="text-center mb-4">Registros futuros</h1>
                 <div className="relative overflow-x-auto">
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
@@ -241,6 +244,8 @@ export default function Dashboard() {
                 </div>
               </Box>
               <Box className="">
+                <h1 className="text-center mb-4">Ranking de registros</h1>
+
                 <div className="relative overflow-x-auto">
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">

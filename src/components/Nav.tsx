@@ -1,6 +1,7 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar } from "./Avatar";
+import { ToggleTheme } from "./ToggleTheme";
 
 export function Nav() {
   const { data: session } = useSession();
@@ -17,9 +18,12 @@ export function Nav() {
             Bem vindo, <span className="font-bold">{session?.user?.name}</span>
           </h1>
         </div>
-        <button onClick={() => signOut({ redirect: true, callbackUrl: "/" })}>
-          Sair
-        </button>
+        <div className="flex gap-1 md:gap-2 items-center">
+          <ToggleTheme />
+          <button onClick={() => signOut({ redirect: true, callbackUrl: "/" })}>
+            Sair
+          </button>
+        </div>
       </nav>
     </>
   );
