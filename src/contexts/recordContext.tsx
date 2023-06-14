@@ -137,7 +137,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
           skipD += 10;
 
-          if (!result.data.recordsConnection.pageInfo.hasNextPage) {
+          if (!result?.data?.recordsConnection?.pageInfo?.hasNextPage) {
             clearIntervalAsync(intervalD);
           }
         }, 400);
@@ -165,7 +165,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
           skipW += 10;
 
-          if (!result.data.recordsConnection.pageInfo.hasNextPage) {
+          if (!result?.data?.recordsConnection?.pageInfo?.hasNextPage) {
             clearIntervalAsync(intervalW);
           }
         }, 400);
