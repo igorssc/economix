@@ -117,61 +117,57 @@ export function RecordProvider({ children }: RecordProviderProps) {
         let skipD = 0;
 
         const intervalD = setIntervalAsync(async () => {
-          await refetchGetAllRecordsFromMonthsAgoByCategory({
+          const result = await refetchGetAllRecordsFromMonthsAgoByCategory({
             email: session?.user?.email,
             category: "deposit",
             dateGTE: getISODateOfMonthsAgo(i),
             dateLTE: getISODateOfMonthsAgo(i, true),
             skip: skipD,
-          }).then((result) => {
-            setAllRecordsFromMonthsAgoByCategory((prev) => {
-              return {
-                withdraws: [...prev.withdraws],
-                deposits: [
-                  ...prev.deposits,
-                  ...result.data.recordsConnection.edges.map(
-                    (v) => v.node as RecordType
-                  ),
-                ],
-              };
-            });
-
-            skipD += 10;
-
-            if (!result.data.recordsConnection.pageInfo.hasNextPage) {
-              clearIntervalAsync(intervalD);
-            }
           });
+
+          setAllRecordsFromMonthsAgoByCategory((prev) => ({
+            withdraws: [...prev.withdraws],
+            deposits: [
+              ...prev.deposits,
+              ...result.data.recordsConnection.edges.map(
+                (v) => v.node as RecordType
+              ),
+            ],
+          }));
+
+          skipD += 10;
+
+          if (!result.data.recordsConnection.pageInfo.hasNextPage) {
+            clearIntervalAsync(intervalD);
+          }
         }, 400);
 
         let skipW = 0;
 
         const intervalW = setIntervalAsync(async () => {
-          await refetchGetAllRecordsFromMonthsAgoByCategory({
+          const result = await refetchGetAllRecordsFromMonthsAgoByCategory({
             email: session?.user?.email,
             category: "withdraw",
             dateGTE: getISODateOfMonthsAgo(i),
             dateLTE: getISODateOfMonthsAgo(i, true),
             skip: skipW,
-          }).then((result) => {
-            setAllRecordsFromMonthsAgoByCategory((prev) => {
-              return {
-                deposits: [...prev.deposits],
-                withdraws: [
-                  ...prev.withdraws,
-                  ...result.data.recordsConnection.edges.map(
-                    (v) => v.node as RecordType
-                  ),
-                ],
-              };
-            });
-
-            skipW += 10;
-
-            if (!result.data.recordsConnection.pageInfo.hasNextPage) {
-              clearIntervalAsync(intervalW);
-            }
           });
+
+          setAllRecordsFromMonthsAgoByCategory((prev) => ({
+            deposits: [...prev.deposits],
+            withdraws: [
+              ...prev.withdraws,
+              ...result.data.recordsConnection.edges.map(
+                (v) => v.node as RecordType
+              ),
+            ],
+          }));
+
+          skipW += 10;
+
+          if (!result.data.recordsConnection.pageInfo.hasNextPage) {
+            clearIntervalAsync(intervalW);
+          }
         }, 400);
       });
     }
