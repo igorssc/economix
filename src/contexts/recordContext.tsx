@@ -129,9 +129,9 @@ export function RecordProvider({ children }: RecordProviderProps) {
             withdraws: [...prev.withdraws],
             deposits: [
               ...prev.deposits,
-              ...result?.data?.recordsConnection?.edges?.map(
+              ...(result?.data?.recordsConnection?.edges?.map(
                 (v) => v.node as RecordType
-              ),
+              ) || []),
             ],
           }));
 
@@ -157,9 +157,9 @@ export function RecordProvider({ children }: RecordProviderProps) {
             deposits: [...prev.deposits],
             withdraws: [
               ...prev.withdraws,
-              ...result?.data?.recordsConnection?.edges?.map(
+              ...(result?.data?.recordsConnection?.edges?.map(
                 (v) => v.node as RecordType
-              ),
+              ) || []),
             ],
           }));
 
