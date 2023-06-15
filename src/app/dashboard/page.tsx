@@ -112,25 +112,25 @@ export default function Dashboard() {
               <SimpleScatterChart />
             </Box>
 
-            <Box className="sm:col-span-6 md:col-span-3 max-md:order-2">
+            <Box className="sm:col-span-6 md:col-span-3">
               <h1 className="text-center mb-4">"Útimos registros"</h1>
               <div className="relative overflow-x-auto">
                 <TableRecords records={allRecordsFrom30DaysAgo} />
               </div>
             </Box>
 
-            <Box>
-              <h1 className="text-center mb-4">Registros futuros</h1>
-              <div className="relative overflow-x-auto">
-                <TableRecords records={allRecordsInFuture} />
-              </div>
-            </Box>
-            <div className="sm:col-span-6 md:col-span-3 max-md:order-1 flex flex-col gap-4">
-              <Box className="">
+            <div className="sm:col-span-6 md:col-span-3 flex flex-col gap-4">
+              <Box className="max-md:order-1">
                 <h1 className="text-center mb-4">Ranking de registros</h1>
 
                 <div className="relative overflow-x-auto">
                   <TableRankingRecords />
+                </div>
+              </Box>
+              <Box className="max-md:order-2">
+                <h1 className="text-center mb-4">Registros futuros</h1>
+                <div className="relative overflow-x-auto">
+                  <TableRecords records={allRecordsInFuture} />
                 </div>
               </Box>
             </div>
