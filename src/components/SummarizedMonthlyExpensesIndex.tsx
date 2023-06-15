@@ -22,7 +22,7 @@ export function SummarizedMonthlyExpensesIndex({
           color="#d1d5db"
           weight="light"
           className={clsx(
-            "dark:bg-gray-950 p-2 md:p-4 rounded-full w-8 h-8 md:w-14 md:h-14",
+            "bg-[#12283d] dark:bg-gray-950 p-2 md:p-4 rounded-full w-8 h-8 md:w-14 md:h-14",
             invert && "md:order-2"
           )}
         />

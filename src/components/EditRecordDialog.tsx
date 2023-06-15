@@ -1,4 +1,4 @@
-import { RecordContext } from "@/contexts/recordContext";
+import { RecordContext, RecordType } from "@/contexts/recordContext";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -10,27 +10,48 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { useSnackbar } from "notistack";
-import { Dispatch, SetStateAction, useContext, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Button } from "./Button";
 
 interface DialogPropsRestart {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  record: RecordType;
 }
 
-const getCurrentDateTimeString = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, "0");
-  const day = now.getDate().toString().padStart(2, "0");
-  const hour = now.getHours().toString().padStart(2, "0");
-  const minute = now.getMinutes().toString().padStart(2, "0");
+export function EditRecordDialog({
+  open,
+  setOpen,
+  record,
+}: DialogPropsRestart) {
+  const getCurrentDateTimeString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, "0");
+    const day = now.getDate().toString().padStart(2, "0");
+    const hour = now.getHours().toString().padStart(2, "0");
+    const minute = now.getMinutes().toString().padStart(2, "0");
 
-  return `${year}-${month}-${day}T${hour}:${minute}`;
-};
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  };
 
-export function Dialog({ open, setOpen }: DialogPropsRestart) {
-  const { createRecord } = useContext(RecordContext);
+  const getDateTimeString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hour = date.getHours().toString().padStart(2, "0");
+    const minute = date.getMinutes().toString().padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  };
+
+  const { updateRecord } = useContext(RecordContext);
   const { enqueueSnackbar } = useSnackbar();
 
   const [title, setTitle] = useState<string>("");
@@ -38,9 +59,8 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
   const [amount, setAmount] = useState<number | string>("0,00");
   const [description, setDescription] = useState<string>();
   const [date, setDate] = useState(getCurrentDateTimeString());
-  const [installments, setInstallments] = useState(1);
 
-  const [isCreatingRecord, setIsCreatingRecord] = useState(false);
+  const [isEditingRecord, setIsEditingRecord] = useState(false);
 
   const handleClose = () => setOpen(false);
 
@@ -92,6 +112,19 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
       .sort(),
   };
 
+  useEffect(() => {
+    setCategory(record.category);
+    setTitle(record.title);
+    setAmount(
+      record.amount.toLocaleString("pr-br", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
+    setDescription(record.description || "");
+    setDate(getDateTimeString(new Date(record.date)));
+  }, []);
+
   const handleSubmit = async () => {
     if (!title) {
       enqueueSnackbar("Insira um título válido, por favor!", {
@@ -117,14 +150,6 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
       return;
     }
 
-    if (!installments || installments < 1) {
-      enqueueSnackbar("Insira uma quantidade de parcelas válida, por favor!", {
-        variant: "warning",
-      });
-
-      return;
-    }
-
     if (!date) {
       enqueueSnackbar("Insira uma data válida, por favor!", {
         variant: "warning",
@@ -134,26 +159,25 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
     }
 
     setIsButtonDisabled(true);
-    setIsCreatingRecord(true);
+    setIsEditingRecord(true);
 
     try {
-      await createRecord({
+      await updateRecord({
+        id: record.id,
         title,
         category,
         amount: +String(amount).replace(/\./g, "").replace(/\,/g, "."),
         description,
-        installments,
         date: new Date(date).toISOString(),
-      }).then(() => {
+      }).then((result) => {
         setTitle("");
         setCategory("");
         setDescription("");
         setAmount("0,00");
         setDate(getCurrentDateTimeString());
-        setInstallments(1);
 
         enqueueSnackbar(
-          "Registro inserido com sucesso! Iremos atualizar em instantes.",
+          "Registro editado com sucesso! Iremos atualizar em instantes.",
           {
             variant: "success",
           }
@@ -167,7 +191,7 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
       return;
     } finally {
       setIsButtonDisabled(false);
-      setIsCreatingRecord(false);
+      setIsEditingRecord(false);
 
       handleClose();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -177,14 +201,17 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
   return (
     <>
       <DialogMui open={open} onClose={handleClose}>
-        <DialogTitle>Criar registro</DialogTitle>
+        <DialogTitle>Editar registro</DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
             select
             label="Categoria"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+              setTitle("");
+              setCategory(e.target.value);
+            }}
             fullWidth
             variant="standard"
           >
@@ -253,18 +280,6 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
           <TextField
             autoFocus
             margin="dense"
-            label="Parcelas"
-            type="number"
-            fullWidth
-            variant="standard"
-            value={installments}
-            onChange={(e) =>
-              +e.target.value >= 0 && setInstallments(+e.target.value)
-            }
-          />
-          <TextField
-            autoFocus
-            margin="dense"
             label="Descrição (opcional)"
             type="text"
             fullWidth
@@ -290,10 +305,10 @@ export function Dialog({ open, setOpen }: DialogPropsRestart) {
             Cancelar
           </Button>
           <Button onClick={handleSubmit} isSmall disabled={isButtonDisabled}>
-            {isCreatingRecord ? (
+            {isEditingRecord ? (
               <div className="inline-block w-7 h-7 after:content-[''] after:block after:w-full after:h-full after:rounded-[50%] after:border-4 after:border-y-white after:border-x-transparent after:animate-spin" />
             ) : (
-              "Criar"
+              "Confirmar"
             )}
           </Button>
         </DialogActions>

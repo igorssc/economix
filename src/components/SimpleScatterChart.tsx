@@ -1,4 +1,5 @@
 import { RecordContext } from "@/contexts/recordContext";
+import { ThemeContext } from "@/contexts/themeContext";
 import { formatDistanceStrict } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -12,6 +13,7 @@ import {
 
 export function SimpleScatterChart() {
   const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
+  const { theme } = useContext(ThemeContext);
 
   const [dataWithdraws, setDataWithdraws] = useState(
     [] as { x: number; y: number }[]
@@ -97,7 +99,10 @@ export function SimpleScatterChart() {
           dataKey="x"
           name="Dia"
           reversed
-          tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
+          tick={{
+            fill: theme === "dark" ? "#d1d5db" : "#000",
+            fontSize: "0.6rem",
+          }}
           axisLine={{ display: "none" }}
           tickLine={{ display: "none" }}
           tickFormatter={formatXAxisTick}
@@ -107,7 +112,10 @@ export function SimpleScatterChart() {
           type="number"
           dataKey="y"
           name="Horas"
-          tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
+          tick={{
+            fill: theme === "dark" ? "#d1d5db" : "#000",
+            fontSize: "0.6rem",
+          }}
           axisLine={{ display: "none" }}
           tickLine={{ display: "none" }}
           tickFormatter={formatYAxisTick}

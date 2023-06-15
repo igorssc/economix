@@ -26,7 +26,7 @@ export default async function RootLayout({
           <RecordProvider>
             <ThemeProvider>
               <body
-                className={`${inter.className} bg-white dark:bg-gray-700 dark:text-gray-300 relative`}
+                className={`${inter.className} bg-gray-200 transition-all duration-100 dark:bg-gray-700 dark:text-gray-300 relative`}
               >
                 {children}
                 <Footer />

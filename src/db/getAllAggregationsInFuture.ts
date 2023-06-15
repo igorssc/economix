@@ -16,6 +16,7 @@ export const GET_ALL_AGGREGATIONS_IN_THE_FUTURE = gql`
           title
           category
           amount
+          installment
           description
           date
         }
@@ -35,6 +36,7 @@ export interface getAllAggregationsInFutureResponse {
         title: string;
         category: string;
         amount: number;
+        installment: number;
         description?: string;
         date: string;
       };

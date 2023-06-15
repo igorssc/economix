@@ -8,7 +8,7 @@ export function Nav() {
 
   return (
     <>
-      <nav className="flex items-center justify-between dark:bg-gray-800 p-4">
+      <nav className="flex bg-white items-center justify-between dark:bg-gray-800 p-4">
         <div className="flex gap-3 items-center">
           <Avatar
             imageUrl={session?.user?.image || ""}

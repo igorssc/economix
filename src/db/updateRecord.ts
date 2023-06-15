@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
-export const GET_UNIQUE_RECORD = gql`
-  query Record($id: String!) {
-    record(where: { id: $id }) {
+export const UPDATE_RECORD = gql`
+  mutation Record($id: ID, $data: RecordUpdateInput!) {
+    updateRecord(data: $data, where: { id: $id }) {
       id
       title
       category
@@ -14,8 +14,8 @@ export const GET_UNIQUE_RECORD = gql`
   }
 `;
 
-export interface getUniqueRecordQueryResponse {
-  record: {
+export interface updateRecordMutationResponse {
+  updateRecord: {
     id: string;
     title: string;
     category: string;

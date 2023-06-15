@@ -23,6 +23,7 @@ export const Button = ({
           "w-full py-4 rounded cursor-pointer text-lg flex items-center justify-center flex-nowrap m-auto border-none md:max-w-md",
           scheme === "primary" && "text-gray-50 bg-[#15599c]",
           scheme === "secondary" && "text-white bg-gray-800",
+          scheme === "tertiary" && "text-white bg-red-800",
           isDisabled && "brightness-50 hover:brightness-50",
           !isDisabled && "hover:brightness-90",
           !isSmall && "md:py-6",

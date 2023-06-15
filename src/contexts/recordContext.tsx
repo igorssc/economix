@@ -12,6 +12,7 @@ import {
   PUBLISH_RECORD,
   publishRecordMutationResponse,
 } from "@/db/publishRecord";
+import { UPDATE_RECORD, updateRecordMutationResponse } from "@/db/updateRecord";
 import { getISODateOfMonthsAgo } from "@/utils/getISODateOfMonthsAgo";
 import { useMutation, useQuery } from "@apollo/client";
 import { differenceInMinutes, formatDistanceStrict } from "date-fns";
@@ -28,6 +29,7 @@ export type RecordType = {
   title: string;
   category: string;
   amount: number;
+  installment: number;
   description?: string;
   date: string;
 };
@@ -57,20 +59,36 @@ type RecordData = {
     };
   }[];
 
-  refetchData: () => void;
-
   createRecord: ({
     title,
     category,
     amount,
     description,
+    installments,
     date,
   }: {
     title: string;
     category: string;
     amount: number;
     description?: string;
+    installments: number;
     date: string;
+  }) => Promise<void>;
+
+  updateRecord: ({
+    id,
+    title,
+    category,
+    amount,
+    description,
+    date,
+  }: {
+    id: string;
+    title?: string | undefined;
+    category?: string | undefined;
+    amount?: number | undefined;
+    description?: string | undefined;
+    date?: string | undefined;
   }) => Promise<void>;
 };
 
@@ -84,6 +102,9 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
   const [publishRegisterMutateFunction] =
     useMutation<publishRecordMutationResponse>(PUBLISH_RECORD);
+
+  const [updateRegisterMutateFunction] =
+    useMutation<updateRecordMutationResponse>(UPDATE_RECORD);
 
   const { refetch: refetchGetAllRecordsFromMonthsAgo } =
     useQuery<getAllAggregationsBetweenDatesQueryResponse>(
@@ -243,10 +264,14 @@ export function RecordProvider({ children }: RecordProviderProps) {
         }))
       );
 
-      setAllRecordsFromMonthsAgoByCategory({
+      const isFirstRender =
+        allRecordsFromMonthsAgoByCategory.deposits.length === 0 &&
+        allRecordsFromMonthsAgoByCategory.withdraws.length === 0;
+
+      const prevArray = {
         deposits: [] as RecordType[],
         withdraws: [] as RecordType[],
-      });
+      };
 
       Array.from({ length: 12 }, (_, i) => {
         setTimeout(() => {
@@ -262,18 +287,30 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
             result.data.recordsConnection.edges.forEach((v) => {
               if (v.node.category === "withdraw") {
-                setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                  deposits: [...prev.deposits],
-                  withdraws: [...prev.withdraws, v.node as RecordType],
-                }));
+                if (isFirstRender) {
+                  setAllRecordsFromMonthsAgoByCategory((prev) => ({
+                    deposits: [...prev.deposits],
+                    withdraws: [...prev.withdraws, v.node as RecordType],
+                  }));
+                } else {
+                  prevArray.withdraws.push(v.node as RecordType);
+                }
               }
               if (v.node.category === "deposit") {
-                setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                  withdraws: [...prev.withdraws],
-                  deposits: [...prev.deposits, v.node as RecordType],
-                }));
+                if (isFirstRender) {
+                  setAllRecordsFromMonthsAgoByCategory((prev) => ({
+                    withdraws: [...prev.withdraws],
+                    deposits: [...prev.deposits, v.node as RecordType],
+                  }));
+                } else {
+                  prevArray.deposits.push(v.node as RecordType);
+                }
               }
             });
+
+            if (i === 11 && !isFirstRender) {
+              setAllRecordsFromMonthsAgoByCategory(prevArray);
+            }
 
             skip += 10;
 
@@ -281,7 +318,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
               clearIntervalAsync(interval);
             }
           }, 500);
-        }, 1000);
+        }, 1000 + i * 1000);
       });
     }
   };
@@ -308,44 +345,76 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
     if (allRecordsFromMonthsAgoByCategory.deposits.length > 0) {
       allRecordsFromMonthsAgoByCategory.deposits.forEach((v, i) => {
-        const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
-          unit: "month",
-          addSuffix: false,
-        }).split(" ")[0];
+        const distanceInMonths = +formatDistanceStrict(
+          new Date(),
+          new Date(v.date),
+          {
+            unit: "month",
+            addSuffix: false,
+          }
+        ).split(" ")[0];
 
         setAllRecordsFromMonthsAgoByMonth((prev) => {
           const newArray = [...prev];
 
-          newArray[distance] = {
-            ...newArray[distance],
-            values: {
-              deposits: [...newArray[distance].values.deposits, v],
-              withdraws: [...newArray[distance].values.withdraws],
-            },
-          };
+          if (distanceInMonths > 0) {
+            newArray[distanceInMonths] = {
+              ...newArray[distanceInMonths],
+              values: {
+                deposits: [...newArray[distanceInMonths].values.deposits, v],
+                withdraws: [...newArray[distanceInMonths].values.withdraws],
+              },
+            };
 
+            return newArray;
+          }
+          if (differenceInMinutes(new Date(), new Date(v.date)) >= 0) {
+            newArray[distanceInMonths] = {
+              ...newArray[distanceInMonths],
+              values: {
+                deposits: [...newArray[distanceInMonths].values.deposits, v],
+                withdraws: [...newArray[distanceInMonths].values.withdraws],
+              },
+            };
+          }
           return newArray;
         });
       });
     }
     if (allRecordsFromMonthsAgoByCategory.withdraws.length > 0) {
       allRecordsFromMonthsAgoByCategory.withdraws.forEach((v, i) => {
-        const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
-          unit: "month",
-          addSuffix: false,
-        }).split(" ")[0];
+        const distanceInMonths = +formatDistanceStrict(
+          new Date(),
+          new Date(v.date),
+          {
+            unit: "month",
+            addSuffix: false,
+          }
+        ).split(" ")[0];
 
         setAllRecordsFromMonthsAgoByMonth((prev) => {
           const newArray = [...prev];
 
-          newArray[distance] = {
-            ...newArray[distance],
-            values: {
-              deposits: [...newArray[distance].values.deposits],
-              withdraws: [...newArray[distance].values.withdraws, v],
-            },
-          };
+          if (distanceInMonths > 0) {
+            newArray[distanceInMonths] = {
+              ...newArray[distanceInMonths],
+              values: {
+                deposits: [...newArray[distanceInMonths].values.deposits],
+                withdraws: [...newArray[distanceInMonths].values.withdraws, v],
+              },
+            };
+            return newArray;
+          }
 
+          if (differenceInMinutes(new Date(), new Date(v.date)) >= 0) {
+            newArray[distanceInMonths] = {
+              ...newArray[distanceInMonths],
+              values: {
+                deposits: [...newArray[distanceInMonths].values.deposits],
+                withdraws: [...newArray[distanceInMonths].values.withdraws, v],
+              },
+            };
+          }
           return newArray;
         });
       });
@@ -357,37 +426,144 @@ export function RecordProvider({ children }: RecordProviderProps) {
     category,
     amount,
     description,
+    installments,
     date,
   }: {
     title: string;
     category: string;
     amount: number;
     description?: string;
+    installments: number;
     date: string;
   }) => {
-    await createRecordMutateFunction({
+    Array.from({ length: installments }).map((_, i) => {
+      setTimeout(async () => {
+        await createRecordMutateFunction({
+          variables: {
+            email: session?.user?.email,
+            title,
+            category,
+            installment: installments > 1 ? i + 1 : 0,
+            amount: +(amount / installments).toFixed(2),
+            description,
+            date: new Date(
+              new Date(date).setMonth(new Date(date).getMonth() + i)
+            ).toISOString(),
+          },
+        }).then(async (response) => {
+          await publishRegisterMutateFunction({
+            variables: {
+              id: response.data?.createRecord.id,
+            },
+          }).then(() => {
+            if (
+              differenceInMinutes(
+                new Date(),
+                new Date(new Date(date).setMonth(new Date(date).getMonth() + i))
+              ) >= 0
+            ) {
+              if (category === "deposit") {
+                setAllRecordsFromMonthsAgoByCategory((prev) => ({
+                  withdraws: [...prev.withdraws],
+                  deposits: [
+                    ...prev.deposits,
+                    response.data?.createRecord as RecordType,
+                  ],
+                }));
+              }
+
+              if (category === "withdraw") {
+                setAllRecordsFromMonthsAgoByCategory((prev) => ({
+                  withdraws: [
+                    ...prev.withdraws,
+                    response.data?.createRecord as RecordType,
+                  ],
+                  deposits: [...prev.deposits],
+                }));
+              }
+            } else {
+              setAllRecordsInFuture((prev) =>
+                [...prev, response.data?.createRecord as RecordType]
+                  .sort(
+                    (a, b) =>
+                      new Date(a.date).getTime() - new Date(b.date).getTime()
+                  )
+                  .slice(0, 10)
+              );
+            }
+          });
+        });
+      }, 1000 * (i + 1));
+    });
+  };
+
+  const updateRecord = async ({
+    id,
+    title,
+    category,
+    amount,
+    description,
+    date,
+  }: {
+    id: string;
+    title?: string;
+    category?: string;
+    amount?: number;
+    description?: string;
+    date?: string;
+  }) => {
+    await updateRegisterMutateFunction({
       variables: {
-        email: session?.user?.email,
-        title,
-        category,
-        amount,
-        description,
-        date,
+        id,
+        data: { title, category, amount, description, date },
       },
-    }).then(async ({ data }) => {
+    }).then(async (response) => {
       await publishRegisterMutateFunction({
         variables: {
-          id: (data as createRecordMutationResponse).createRecord.id,
+          id: response.data?.updateRecord.id,
         },
       }).then(() => {
-        if (differenceInMinutes(new Date(), new Date(date)) >= 0) {
-          searchLastData();
+        setAllRecordsFromMonthsAgoByCategory((prev) => ({
+          withdraws: [...prev.withdraws].filter((v) => v.id !== id),
+          deposits: [...prev.deposits].filter((v) => v.id !== id),
+        }));
+
+        setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== id));
+
+        if (
+          differenceInMinutes(
+            new Date(),
+            new Date(response.data?.updateRecord.date || "")
+          ) >= 0
+        ) {
+          if (response.data?.updateRecord.category === "deposit") {
+            setAllRecordsFromMonthsAgoByCategory((prev) => ({
+              withdraws: [...prev.withdraws],
+              deposits: [
+                ...prev.deposits,
+                response.data?.updateRecord as RecordType,
+              ],
+            }));
+          }
+
+          if (response.data?.updateRecord.category === "withdraw") {
+            setAllRecordsFromMonthsAgoByCategory((prev) => ({
+              withdraws: [
+                ...prev.withdraws,
+                response.data?.updateRecord as RecordType,
+              ],
+              deposits: [...prev.deposits],
+            }));
+          }
         } else {
-          refetchGetAllRecordsInFuture({
-            email: session?.user?.email,
-            dateGTE: new Date().toISOString(),
-            skip: 0,
-          });
+          setAllRecordsInFuture((prev) =>
+            [...prev, response.data?.updateRecord as RecordType]
+              .sort(
+                (a, b) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime()
+              )
+              .slice(0, 10)
+          );
         }
       });
     });
@@ -402,7 +578,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
         allRecordsFrom30DaysAgo,
         allRecordsInFuture,
         createRecord,
-        refetchData: searchLastData,
+        updateRecord,
       }}
     >
       {children}

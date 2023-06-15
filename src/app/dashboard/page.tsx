@@ -1,14 +1,19 @@
 "use client";
 import { Box } from "@/components/Box";
+import { DeleteRecordDialog } from "@/components/DeleteRecordDialog";
 import { Dialog } from "@/components/Dialog";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { MultiLineChart } from "@/components/MultiLineChart";
 import { Nav } from "@/components/Nav";
-import { NewRegister } from "@/components/NewRegister";
+import { NewRegisterButton } from "@/components/NewRegisterButton";
 import { SimpleBarChart } from "@/components/SimpleBarChart";
 import { SimpleLineChart } from "@/components/SimpleLineChart";
 import { SimpleScatterChart } from "@/components/SimpleScatterChart";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
-import { RecordContext } from "@/contexts/recordContext";
+import { ViewRecordDialog } from "@/components/ViewRecordDialog";
+import { RecordContext, RecordType } from "@/contexts/recordContext";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
 import { ArrowDown, ArrowUp } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -21,6 +26,11 @@ export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [isOpenViewRecordDialog, setIsOpenViewRecordDialog] = useState(false);
+  const [isOpenEditRecordDialog, setIsOpenEditRecordDialog] = useState(false);
+  const [isOpenDeleteRecordDialog, setIsOpenDeleteRecordDialog] =
+    useState(false);
+  const [recordSelected, setRecordSelected] = useState({} as RecordType);
 
   const {
     allRecordsFromMonthsAgoByMonth,
@@ -63,7 +73,50 @@ export default function Dashboard() {
   }, [countAllQuantitiesAndAmountOf30DaysAgoByTitle]);
 
   if (status === "loading") {
-    return <>Carregando...</>;
+    return (
+      <>
+        <Skeleton variant="rectangular" className="w-full !h-20 mb-6" />
+        <Stack
+          spacing={2}
+          className="flex justify-center items-center max-w-[1280px] p-4 m-auto"
+        >
+          <Skeleton
+            variant="rectangular"
+            className="w-80 !h-16 mx-auto max-w-full"
+          />
+          <div className="flex gap-4 pb-6">
+            <div className="flex max-md:flex-col gap-4 justify-center items-center">
+              <Skeleton variant="circular" className="w-16 !h-16" />
+              <Skeleton
+                variant="rectangular"
+                className="w-32 sm:w-48 md:w-60 !h-16 mx-auto max-w-full"
+              />
+            </div>
+            <div className="flex max-md:flex-col gap-4 justify-center items-center">
+              <Skeleton
+                variant="rectangular"
+                className="max-md:order-2 w-32 sm:w-48 md:w-60 !h-16 mx-auto max-w-full"
+              />
+              <Skeleton
+                variant="circular"
+                className="max-md:order-1 w-16 !h-16"
+              />
+            </div>
+          </div>
+          <Skeleton variant="rectangular" className="w-full !h-80" />
+          <div className="w-full gap-4 grid grid-cols-3">
+            <Skeleton variant="rectangular" className="w-full !h-80" />
+            <Skeleton variant="rectangular" className="w-full !h-80" />
+            <Skeleton variant="rectangular" className="w-full !h-80" />
+          </div>
+          <Skeleton variant="rectangular" className="w-full !h-80" />
+          <div className="w-full gap-4 grid grid-cols-2">
+            <Skeleton variant="rectangular" className="w-full !h-80" />
+            <Skeleton variant="rectangular" className="w-full !h-80" />
+          </div>
+        </Stack>
+      </>
+    );
   }
 
   if (!session?.user) {
@@ -75,8 +128,34 @@ export default function Dashboard() {
     <>
       <SnackbarProvider maxSnack={3}>
         <Nav />
-        <NewRegister onClick={() => setIsOpenDialog(true)} />
+        <NewRegisterButton onClick={() => setIsOpenDialog(true)} />
         <Dialog open={isOpenDialog} setOpen={setIsOpenDialog} />
+
+        {isOpenViewRecordDialog && (
+          <ViewRecordDialog
+            open={isOpenViewRecordDialog}
+            setOpen={setIsOpenViewRecordDialog}
+            record={recordSelected}
+            setOpenEdit={setIsOpenEditRecordDialog}
+            setOpenDelete={setIsOpenDeleteRecordDialog}
+          />
+        )}
+
+        {isOpenEditRecordDialog && (
+          <EditRecordDialog
+            open={isOpenEditRecordDialog}
+            setOpen={setIsOpenEditRecordDialog}
+            record={recordSelected}
+          />
+        )}
+
+        {isOpenDeleteRecordDialog && (
+          <DeleteRecordDialog
+            open={isOpenDeleteRecordDialog}
+            setOpen={setIsOpenDeleteRecordDialog}
+            record={recordSelected}
+          />
+        )}
 
         <main className="max-w-[1280px] p-4 m-auto">
           <div className="flex flex-col gap-8 justify-center items-center">
@@ -170,7 +249,7 @@ export default function Dashboard() {
               <h1 className="text-center mb-4">Útimos registros</h1>
               <div className="relative overflow-x-auto">
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
+                  <thead className="text-xs uppercase bg-[#15599c] text-gray-50">
                     <tr className="[&_th]:px-6 [&_th]:py-3">
                       <th scope="col">Título</th>
                       <th scope="col">Categoria</th>
@@ -179,20 +258,33 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
-                    {allRecordsFrom30DaysAgo.map((v) => (
-                      <tr key={v.id}>
-                        <th scope="row">{v.title}</th>
+                    {allRecordsFrom30DaysAgo.map((value) => (
+                      <tr key={value.id}>
+                        <th
+                          scope="row"
+                          onClick={() => {
+                            setRecordSelected(value);
+                            setIsOpenViewRecordDialog(true);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {value.installment > 0
+                            ? `${value.title} - Parc ${value.installment}`
+                            : value.title}
+                        </th>
                         <td>
-                          {v.category === "deposit" ? "Depósito" : "Retirada"}
+                          {value.category === "deposit"
+                            ? "Depósito"
+                            : "Retirada"}
                         </td>
                         <td>
-                          {v.amount?.toLocaleString("pt-br", {
+                          {value.amount?.toLocaleString("pt-br", {
                             style: "currency",
                             currency: "BRL",
                           })}
                         </td>
                         <td>
-                          {new Date(v.date).toLocaleDateString("pt-br", {
+                          {new Date(value.date).toLocaleDateString("pt-br", {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
@@ -208,7 +300,7 @@ export default function Dashboard() {
                 <h1 className="text-center mb-4">Registros futuros</h1>
                 <div className="relative overflow-x-auto">
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
+                    <thead className="text-xs uppercase bg-[#15599c] text-gray-50">
                       <tr className="[&_th]:px-6 [&_th]:py-3">
                         <th scope="col">Título</th>
                         <th scope="col">Categoria</th>
@@ -219,7 +311,11 @@ export default function Dashboard() {
                     <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
                       {allRecordsInFuture.map((value, index) => (
                         <tr key={index}>
-                          <th scope="row">{value.title}</th>
+                          <th scope="row">
+                            {value.installment > 0
+                              ? `${value.title} - Parc ${value.installment}`
+                              : value.title}
+                          </th>
                           <td>
                             {value.category === "deposit"
                               ? "Depósito"
@@ -248,7 +344,7 @@ export default function Dashboard() {
 
                 <div className="relative overflow-x-auto">
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#15599c] dark:text-gray-50">
+                    <thead className="text-xs uppercase bg-[#15599c] text-gray-50">
                       <tr className="[&_th]:px-6 [&_th]:py-3">
                         <th scope="col">Título</th>
                         <th scope="col">Quantidade</th>

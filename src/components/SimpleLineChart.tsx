@@ -1,4 +1,5 @@
 import { RecordContext } from "@/contexts/recordContext";
+import { ThemeContext } from "@/contexts/themeContext";
 import { useContext } from "react";
 import {
   Area,
@@ -11,6 +12,7 @@ import {
 
 export function SimpleLineChart() {
   const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
+  const { theme } = useContext(ThemeContext);
 
   const data = Array.from(
     { length: Math.floor(allRecordsFromMonthsAgoByMonth.length / 2) },
@@ -63,13 +65,19 @@ export function SimpleLineChart() {
         <XAxis
           dataKey="name"
           axisLine={{ display: "none" }}
-          tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
+          tick={{
+            fill: theme === "dark" ? "#d1d5db" : "#000",
+            fontSize: "0.6rem",
+          }}
           tickLine={{ display: "none" }}
           interval="preserveStart"
           tickFormatter={formatXAxisTick}
         />
         <YAxis
-          tick={{ fill: "#d1d5db", fontSize: "0.6rem" }}
+          tick={{
+            fill: theme === "dark" ? "#d1d5db" : "#000",
+            fontSize: "0.6rem",
+          }}
           display="none"
           tickFormatter={formatYAxisTick}
           axisLine={{ display: "none" }}
@@ -77,7 +85,7 @@ export function SimpleLineChart() {
         />
         <defs>
           <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2f8eec" />
+            <stop offset="0%" stopColor="#030712" />
             <stop offset="100%" stopColor="rgba(0, 123, 255, 0)" />
           </linearGradient>
         </defs>

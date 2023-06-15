@@ -22,6 +22,7 @@ export const GET_ALL_AGGREGATIONS_BETWEEN_DATES = gql`
           category
           amount
           description
+          installment
           date
         }
       }
@@ -40,6 +41,7 @@ export interface getAllAggregationsBetweenDatesQueryResponse {
         title: string;
         category: string;
         amount: number;
+        installment: number;
         description?: string;
         date: string;
       };
