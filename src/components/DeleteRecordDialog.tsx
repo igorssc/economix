@@ -1,44 +1,40 @@
-import { RecordType } from "@/contexts/recordContext";
+import { DialogContext } from "@/contexts/dialogsContext";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Dispatch, SetStateAction } from "react";
+import { useContext } from "react";
 import { Button } from "./Button";
 
-interface DialogPropsRestart {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  record: RecordType;
-}
-
-export function DeleteRecordDialog({
-  open,
-  setOpen,
-  record,
-}: DialogPropsRestart) {
+export function DeleteRecordDialog() {
   const handleClose = () => setOpen(false);
+  const {
+    isOpenDeleteRecordDialog: open,
+    setIsOpenDeleteRecordDialog: setOpen,
+    recordSelected,
+  } = useContext(DialogContext);
 
   return (
     <>
-      <DialogMui open={open} onClose={handleClose}>
+      <DialogMui open={open} onClose={handleClose} fullWidth>
         <DialogTitle>Tem certeza?</DialogTitle>
-        <DialogContent className="flex flex-col gap-3 sm:w-96">
-          <h1>Título: {record.title}</h1>
+        <DialogContent className="flex flex-col gap-3">
+          <h1>Título: {recordSelected.title}</h1>
           <h1>
-            Categoria: {record.category === "deposit" ? "Depósito" : "Retirada"}
+            Categoria:{" "}
+            {recordSelected.category === "deposit" ? "Depósito" : "Retirada"}
           </h1>
           <h1>
             Valor:{" "}
-            {record.amount?.toLocaleString("pt-br", {
+            {recordSelected.amount?.toLocaleString("pt-br", {
               style: "currency",
               currency: "BRL",
             })}
           </h1>
-          <h1>Descrição: {record.description}</h1>
+          <h1>Descrição: {recordSelected.description}</h1>
           <h1>
             Data:{" "}
-            {new Date(record.date).toLocaleDateString("pt-br", {
+            {new Date(recordSelected.date).toLocaleDateString("pt-br", {
               hour: "2-digit",
               minute: "2-digit",
             })}

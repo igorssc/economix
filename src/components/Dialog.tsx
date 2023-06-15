@@ -1,3 +1,4 @@
+import { DialogContext } from "@/contexts/dialogsContext";
 import { RecordContext } from "@/contexts/recordContext";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -10,13 +11,8 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { useSnackbar } from "notistack";
-import { Dispatch, SetStateAction, useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Button } from "./Button";
-
-interface DialogPropsRestart {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}
 
 const getCurrentDateTimeString = () => {
   const now = new Date();
@@ -29,8 +25,12 @@ const getCurrentDateTimeString = () => {
   return `${year}-${month}-${day}T${hour}:${minute}`;
 };
 
-export function Dialog({ open, setOpen }: DialogPropsRestart) {
+export function Dialog() {
   const { createRecord } = useContext(RecordContext);
+  const {
+    isOpenCreateRecordDialog: open,
+    setIsOpenCreateRecordDialog: setOpen,
+  } = useContext(DialogContext);
   const { enqueueSnackbar } = useSnackbar();
 
   const [title, setTitle] = useState<string>("");

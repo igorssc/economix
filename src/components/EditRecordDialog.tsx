@@ -1,4 +1,5 @@
-import { RecordContext, RecordType } from "@/contexts/recordContext";
+import { DialogContext } from "@/contexts/dialogsContext";
+import { RecordContext } from "@/contexts/recordContext";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -10,26 +11,10 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { useSnackbar } from "notistack";
-import {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "./Button";
 
-interface DialogPropsRestart {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  record: RecordType;
-}
-
-export function EditRecordDialog({
-  open,
-  setOpen,
-  record,
-}: DialogPropsRestart) {
+export function EditRecordDialog() {
   const getCurrentDateTimeString = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -52,6 +37,12 @@ export function EditRecordDialog({
   };
 
   const { updateRecord } = useContext(RecordContext);
+  const {
+    isOpenEditRecordDialog: open,
+    setIsOpenEditRecordDialog: setOpen,
+    recordSelected,
+  } = useContext(DialogContext);
+
   const { enqueueSnackbar } = useSnackbar();
 
   const [title, setTitle] = useState<string>("");
@@ -113,16 +104,16 @@ export function EditRecordDialog({
   };
 
   useEffect(() => {
-    setCategory(record.category);
-    setTitle(record.title);
+    setCategory(recordSelected.category);
+    setTitle(recordSelected.title);
     setAmount(
-      record.amount.toLocaleString("pr-br", {
+      recordSelected.amount.toLocaleString("pr-br", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })
     );
-    setDescription(record.description || "");
-    setDate(getDateTimeString(new Date(record.date)));
+    setDescription(recordSelected.description || "");
+    setDate(getDateTimeString(new Date(recordSelected.date)));
   }, []);
 
   const handleSubmit = async () => {
@@ -163,7 +154,7 @@ export function EditRecordDialog({
 
     try {
       await updateRecord({
-        id: record.id,
+        id: recordSelected.id,
         title,
         category,
         amount: +String(amount).replace(/\./g, "").replace(/\,/g, "."),
