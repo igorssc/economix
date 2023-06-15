@@ -59,6 +59,11 @@ type RecordData = {
     };
   }[];
 
+  allRecordsFromMonthsAgoByCategory: {
+    deposits: RecordType[];
+    withdraws: RecordType[];
+  };
+
   createRecord: ({
     title,
     category,
@@ -575,6 +580,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
         countAllRecordsFromMonthsAgoByCategory,
         countAllQuantitiesAndAmountOf30DaysAgoByTitle,
         allRecordsFromMonthsAgoByMonth,
+        allRecordsFromMonthsAgoByCategory,
         allRecordsFrom30DaysAgo,
         allRecordsInFuture,
         createRecord,

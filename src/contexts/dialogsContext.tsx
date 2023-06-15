@@ -1,8 +1,9 @@
 "use client";
+import { CreateRecordDialog } from "@/components/CreateRecordDialog";
 import { DeleteRecordDialog } from "@/components/DeleteRecordDialog";
-import { Dialog } from "@/components/Dialog";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { ViewRecordDialog } from "@/components/ViewRecordDialog";
+import { SnackbarProvider } from "notistack";
 import {
   Dispatch,
   ReactNode,
@@ -57,13 +58,15 @@ export function DialogProvider({ children }: DialogProviderProps) {
       }}
     >
       <>
-        <Dialog />
+        <SnackbarProvider maxSnack={3}>
+          <CreateRecordDialog />
 
-        {isOpenViewRecordDialog && <ViewRecordDialog />}
+          {isOpenViewRecordDialog && <ViewRecordDialog />}
 
-        {isOpenEditRecordDialog && <EditRecordDialog />}
+          {isOpenEditRecordDialog && <EditRecordDialog />}
 
-        {isOpenDeleteRecordDialog && <DeleteRecordDialog />}
+          {isOpenDeleteRecordDialog && <DeleteRecordDialog />}
+        </SnackbarProvider>
         {children}
       </>
     </DialogContext.Provider>

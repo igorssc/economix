@@ -25,7 +25,7 @@ const getCurrentDateTimeString = () => {
   return `${year}-${month}-${day}T${hour}:${minute}`;
 };
 
-export function Dialog() {
+export function CreateRecordDialog() {
   const { createRecord } = useContext(RecordContext);
   const {
     isOpenCreateRecordDialog: open,

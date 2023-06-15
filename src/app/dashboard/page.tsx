@@ -1,6 +1,8 @@
 "use client";
+import reminderImg from "@/assets/reminder.svg";
 import { BaseSummarizedMonthlyExpensesIndex } from "@/components/BaseSummarizedMonthlyExpensesIndex";
 import { Box } from "@/components/Box";
+import { Button } from "@/components/Button";
 import { MultiLineChart } from "@/components/MultiLineChart";
 import { Nav } from "@/components/Nav";
 import { NewRegisterButton } from "@/components/NewRegisterButton";
@@ -27,6 +29,8 @@ export default function Dashboard() {
     allRecordsFrom30DaysAgo,
     countAllQuantitiesAndAmountOf30DaysAgoByTitle,
     allRecordsInFuture,
+    countAllRecordsFromMonthsAgoByCategory,
+    allRecordsFromMonthsAgoByCategory,
   } = useContext(RecordContext);
 
   const { setIsOpenCreateRecordDialog } = useContext(DialogContext);
@@ -59,6 +63,36 @@ export default function Dashboard() {
   if (!session?.user) {
     router.push("/");
     return null;
+  }
+
+  if (
+    !(
+      allRecordsFromMonthsAgoByCategory.deposits.length > 0 ||
+      allRecordsFromMonthsAgoByCategory.withdraws.length > 0
+    )
+  ) {
+    return (
+      <>
+        <Nav />
+
+        <main className="max-w-[1280px] text-center px-4 py-10 m-auto flex justify-center items-center flex-col gap-10">
+          <Image
+            src={reminderImg}
+            className="w-[200px] max-w-[90%]"
+            alt="Reminder icon"
+          />
+          <h1 className="sm:text-lg md:text-xl uppercase font-medium">
+            Você ainda não possui atividade!
+          </h1>
+          <h1 className="sm:text-lg md:text-xl font-medium">
+            Clique no botão abaixo e comece a organizar sua vida!
+          </h1>
+          <Button onClick={() => setIsOpenCreateRecordDialog(true)}>
+            Clique aqui
+          </Button>
+        </main>
+      </>
+    );
   }
 
   return (
@@ -113,7 +147,7 @@ export default function Dashboard() {
             </Box>
 
             <Box className="sm:col-span-6 md:col-span-3">
-              <h1 className="text-center mb-4">"Útimos registros"</h1>
+              <h1 className="text-center mb-4">Útimos registros</h1>
               <div className="relative overflow-x-auto">
                 <TableRecords records={allRecordsFrom30DaysAgo} />
               </div>
