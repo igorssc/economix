@@ -7,6 +7,7 @@ interface SummarizedMonthlyExpensesIndexProps {
   title: string;
   description?: string;
   _icon: Icon;
+  isHideValues?: boolean;
 }
 
 export function SummarizedMonthlyExpensesIndex({
@@ -14,6 +15,7 @@ export function SummarizedMonthlyExpensesIndex({
   title,
   description,
   _icon,
+  isHideValues = false,
 }: SummarizedMonthlyExpensesIndexProps) {
   return (
     <>
@@ -27,7 +29,14 @@ export function SummarizedMonthlyExpensesIndex({
           )}
         />
         <p className={clsx("text-sm", invert && "md:text-right md:order-1")}>
-          <span className="md:text-lg max-md:font-bold">{title}</span>
+          <span
+            className={clsx(
+              "md:text-lg max-md:font-bold",
+              isHideValues && "blur-md text-purple-700"
+            )}
+          >
+            {title}
+          </span>
           {description && (
             <>
               <br />
