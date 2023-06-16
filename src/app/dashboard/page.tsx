@@ -45,48 +45,53 @@ export default function Dashboard() {
     );
 
   useEffect(() => {
-    const biggestExpense = allRecordsFrom30DaysAgo
-      .filter((v) => v.category === "withdraw")
-      .reduce(
-        (acc, v) => {
-          const indexExists = acc.map((v1) => v1.title).indexOf(v.title);
+    const processRecords = async () => {
+      const biggestExpense: {
+        title: string;
+        quantity: number;
+        totalAmount: number;
+      }[] = allRecordsFrom30DaysAgo
+        .filter((v) => v.category === "withdraw")
+        .reduce(
+          (acc, v) => {
+            const indexExists = acc.findIndex((v1) => v1.title === v.title);
 
-          if (indexExists > 0) {
-            const prevArray = [...acc];
+            if (indexExists > -1) {
+              const prevArray = [...acc];
+              prevArray[indexExists] = {
+                title: prevArray[indexExists].title,
+                quantity: prevArray[indexExists].quantity + 1,
+                totalAmount: prevArray[indexExists].totalAmount + v.amount,
+              };
+              return prevArray;
+            } else {
+              return [
+                ...acc,
+                {
+                  title: v.title,
+                  quantity: 1,
+                  totalAmount: v.amount,
+                },
+              ];
+            }
+          },
+          [] as {
+            title: string;
+            quantity: number;
+            totalAmount: number;
+          }[]
+        );
 
-            prevArray[indexExists] = {
-              title: prevArray[indexExists].title,
-              quantity: prevArray[indexExists].quantity + 1,
-              totalAmount: prevArray[indexExists].totalAmount + v.amount,
-            };
+      const sortedExpenses = biggestExpense.sort(
+        (a, b) => b.totalAmount - a.totalAmount
+      );
 
-            return prevArray;
-          } else {
-            return [
-              ...acc,
-              {
-                title: v.title,
-                quantity: 1,
-                totalAmount: v.amount,
-              },
-            ];
-          }
-        },
-        [] as {
-          title: string;
-          quantity: number;
-          totalAmount: number;
-        }[]
-      )
-      .sort((a, b) => b.totalAmount - a.totalAmount)[0];
+      if (sortedExpenses.length > 0) {
+        setHighestExpenseInTheLast30Days(sortedExpenses[0]);
+      }
+    };
 
-    setHighestExpenseInTheLast30Days(biggestExpense);
-
-    // setHighestExpenseInTheLast30Days(
-    // countAllQuantitiesAndAmountOf30DaysAgoByTitle.sort(
-    //   (a, b) => b.totalAmount - a.totalAmount
-    // )[0]
-    // );
+    processRecords();
   }, [countAllQuantitiesAndAmountOf30DaysAgoByTitle]);
 
   if (status === "loading") {

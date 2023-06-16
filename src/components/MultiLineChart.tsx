@@ -1,6 +1,6 @@
 import { RecordContext } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -14,24 +14,33 @@ export function MultiLineChart() {
   const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
   const { theme } = useContext(ThemeContext);
 
-  const data = Array.from(
-    { length: allRecordsFromMonthsAgoByMonth.length },
-    (_, i) => {
-      return {
-        name: new Date(
-          new Date().setMonth(new Date().getMonth() - i)
-        ).toLocaleDateString("pt-br", { month: "long" }),
-        value1: allRecordsFromMonthsAgoByMonth[i].values.deposits.reduce(
-          (acc, v) => (acc += v.amount),
-          0
-        ),
-        value2: allRecordsFromMonthsAgoByMonth[i].values.withdraws.reduce(
-          (acc, v) => (acc += v.amount),
-          0
-        ),
-      };
-    }
-  ).reverse();
+  const [data, setData] = useState(
+    [] as {
+      name: string;
+      value1: number;
+      value2: number;
+    }[]
+  );
+
+  useEffect(() => {
+    setData(
+      Array.from({ length: allRecordsFromMonthsAgoByMonth.length }, (_, i) => {
+        return {
+          name: new Date(
+            new Date().setMonth(new Date().getMonth() - i)
+          ).toLocaleDateString("pt-br", { month: "long" }),
+          value1: allRecordsFromMonthsAgoByMonth[i].values.deposits.reduce(
+            (acc, v) => (acc += v.amount),
+            0
+          ),
+          value2: allRecordsFromMonthsAgoByMonth[i].values.withdraws.reduce(
+            (acc, v) => (acc += v.amount),
+            0
+          ),
+        };
+      }).reverse()
+    );
+  }, [allRecordsFromMonthsAgoByMonth]);
 
   const formatXAxisTick = (value: string, _index: number) => {
     return value.charAt(0).toUpperCase() + value.slice(1, 3).toLowerCase();
