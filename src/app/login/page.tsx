@@ -3,7 +3,7 @@ import { Box } from "@/components/Box";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import economixLogoImg from "../../assets/economix-logo.png";
+import economixLogoImg from "../../assets/economix-logo.webp";
 import facebookLogoImg from "../../assets/facebook-logo.svg";
 import googleLogoImg from "../../assets/google-logo.svg";
 

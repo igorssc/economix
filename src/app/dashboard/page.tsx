@@ -19,7 +19,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { SnackbarProvider } from "notistack";
 import { useContext, useEffect, useState } from "react";
-import onlineShoppingImg from "../../assets/online-shopping.png";
+import onlineShoppingImg from "../../assets/online-shopping.webp";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -75,21 +75,23 @@ export default function Dashboard() {
       <>
         <Nav />
 
-        <main className="max-w-[1280px] text-center px-4 py-10 m-auto flex justify-center items-center flex-col gap-10">
-          <Image
-            src={reminderImg}
-            className="w-[200px] max-w-[90%]"
-            alt="Reminder icon"
-          />
-          <h1 className="sm:text-lg md:text-xl uppercase font-medium">
-            Você ainda não possui atividade!
-          </h1>
-          <h1 className="sm:text-lg md:text-xl font-medium">
-            Clique no botão abaixo e comece a organizar sua vida!
-          </h1>
-          <Button onClick={() => setIsOpenCreateRecordDialog(true)}>
-            Clique aqui
-          </Button>
+        <main className="max-w-[1280px] md:h-[calc(100vh-230px)] text-center px-4 py-10 m-auto flex justify-center items-center">
+          <div className="flex flex-col gap-10 items-center justify-center">
+            <Image
+              src={reminderImg}
+              className="w-[300px] max-w-[90%]"
+              alt="Reminder icon"
+            />
+            <h1 className="sm:text-lg md:text-xl uppercase font-medium">
+              Você ainda não possui atividade!
+            </h1>
+            <h1 className="sm:text-lg md:text-xl font-medium">
+              Clique no botão abaixo e comece a organizar sua vida!
+            </h1>
+            <Button onClick={() => setIsOpenCreateRecordDialog(true)}>
+              Clique aqui
+            </Button>
+          </div>
         </main>
       </>
     );
