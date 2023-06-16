@@ -1,7 +1,7 @@
 {
   "name": "economix",
-  "version": "0.1.0",
-  "private": true,
+  "author": "Igor Santos",
+  "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -40,5 +40,15 @@
     "eslint": "8.41.0",
     "eslint-config-next": "13.4.4",
     "typescript": "5.1.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igorssc/economix.git"
+  },
+  "author": "Igor Santos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/igorssc/economix/issues"
+  },
+  "homepage": "https://github.com/igorssc/economix#readme"
 }

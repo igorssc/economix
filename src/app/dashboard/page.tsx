@@ -1,6 +1,5 @@
 "use client";
 import reminderImg from "@/assets/reminder.svg";
-import { BaseSummarizedMonthlyExpensesIndex } from "@/components/BaseSummarizedMonthlyExpensesIndex";
 import { Box } from "@/components/Box";
 import { Button } from "@/components/Button";
 import { MultiLineChart } from "@/components/MultiLineChart";
@@ -10,6 +9,7 @@ import { SimpleBarChart } from "@/components/SimpleBarChart";
 import { SimpleLineChart } from "@/components/SimpleLineChart";
 import { SimpleScatterChart } from "@/components/SimpleScatterChart";
 import { SkeletonDashboard } from "@/components/SkeletonDashboard";
+import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
 import { TableRankingRecords } from "@/components/TableRankingRecords";
 import { TableRecords } from "@/components/TableRecords";
 import { DialogContext } from "@/contexts/dialogsContext";
@@ -45,11 +45,48 @@ export default function Dashboard() {
     );
 
   useEffect(() => {
-    setHighestExpenseInTheLast30Days(
-      countAllQuantitiesAndAmountOf30DaysAgoByTitle.sort(
-        (a, b) => b.totalAmount - a.totalAmount
-      )[0]
-    );
+    const biggestExpense = allRecordsFrom30DaysAgo
+      .filter((v) => v.category === "withdraw")
+      .reduce(
+        (acc, v) => {
+          const indexExists = acc.map((v1) => v1.title).indexOf(v.title);
+
+          if (indexExists > 0) {
+            const prevArray = [...acc];
+
+            prevArray[indexExists] = {
+              title: prevArray[indexExists].title,
+              quantity: prevArray[indexExists].quantity + 1,
+              totalAmount: prevArray[indexExists].totalAmount + v.amount,
+            };
+
+            return prevArray;
+          } else {
+            return [
+              ...acc,
+              {
+                title: v.title,
+                quantity: 1,
+                totalAmount: v.amount,
+              },
+            ];
+          }
+        },
+        [] as {
+          title: string;
+          quantity: number;
+          totalAmount: number;
+        }[]
+      )
+      .sort((a, b) => b.totalAmount - a.totalAmount)[0];
+
+    setHighestExpenseInTheLast30Days(biggestExpense);
+
+    // setHighestExpenseInTheLast30Days(
+    // countAllQuantitiesAndAmountOf30DaysAgoByTitle.sort(
+    //   (a, b) => b.totalAmount - a.totalAmount
+    // )[0]
+    // );
   }, [countAllQuantitiesAndAmountOf30DaysAgoByTitle]);
 
   if (status === "loading") {
@@ -104,7 +141,7 @@ export default function Dashboard() {
         <NewRegisterButton onClick={() => setIsOpenCreateRecordDialog(true)} />
 
         <main className="max-w-[1280px] p-4 m-auto">
-          <BaseSummarizedMonthlyExpensesIndex />
+          <SummarizedMonthlyExpensesIndex />
 
           <MultiLineChart />
           <div className="flex flex-col sm:grid sm:grid-cols-6 md:col-span-2 gap-4 mt-4">

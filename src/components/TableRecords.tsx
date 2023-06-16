@@ -13,7 +13,7 @@ export function TableRecords({ records }: TableRecordsProps) {
   return (
     <>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-xs uppercase bg-purple-700 dark:bg-purple-900 text-gray-50">
+        <thead className="text-xs uppercase bg-purple-700 dark:bg-purple-950 text-gray-50">
           <tr className="[&_th]:px-6 [&_th]:py-3">
             <th scope="col">Título</th>
             <th scope="col">Categoria</th>
