@@ -125,8 +125,14 @@ export function SimpleScatterChart() {
           cursor={{ strokeDasharray: "3 3" }}
           content={renderTooltipContent}
         />
-        <Scatter data={dataDeposits} fill="#2f8eec" />
-        <Scatter data={dataWithdraws} fill="#ec4e2f" />
+        <Scatter
+          data={dataDeposits}
+          fill={theme === "dark" ? "rgb(107,33,168)" : "rgb(126, 34, 206)"}
+        />
+        <Scatter
+          data={dataWithdraws}
+          fill={theme === "dark" ? "rgba(174, 4, 4,0.5)" : "rgb(174, 4, 4)"}
+        />
       </ScatterChart>
     </ResponsiveContainer>
   );

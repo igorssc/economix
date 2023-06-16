@@ -8,14 +8,14 @@ export function TableRankingRecords() {
   return (
     <>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-xs uppercase bg-[#15599c] text-gray-50">
+        <thead className="text-xs uppercase bg-purple-700 dark:bg-purple-900 text-gray-50">
           <tr className="[&_th]:px-6 [&_th]:py-3">
             <th scope="col">Título</th>
             <th scope="col">Quantidade</th>
             <th scope="col">Total</th>
           </tr>
         </thead>
-        <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:bg-gray-800 [&_tr]:dark:border-gray-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
+        <tbody className="[&>*:not(:last-child)]:border-b [&_tr]:dark:border-zinc-700 [&_tr>th]:px-6 [&_tr>th]:py-4 [&_tr>th]:font-medium [&_tr>th]:text-gray-900 [&_tr>th]:whitespace-nowrap [&_tr>th]:dark:text-white [&_tr>td]:px-6 [&_tr>td]:py-4">
           {countAllQuantitiesAndAmountOf30DaysAgoByTitle.map((value, index) => (
             <tr key={index}>
               <th scope="row">

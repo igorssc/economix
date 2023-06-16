@@ -84,8 +84,8 @@ export function SimpleLineChart() {
           tickLine={{ display: "none" }}
         />
         <defs>
-          <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#030712" />
+          <linearGradient id="gradientLine" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgb(107,33,168)" />
             <stop offset="100%" stopColor="rgba(0, 123, 255, 0)" />
           </linearGradient>
         </defs>
@@ -93,8 +93,8 @@ export function SimpleLineChart() {
         <Area
           type="monotone"
           dataKey="value"
-          fill="url(#gradient)"
-          stroke="#030712"
+          stroke={theme === "dark" ? "rgb(88,28,135)" : "rgb(126, 34, 206)"}
+          fill="url(#gradientLine)"
           dot
         />
       </AreaChart>

@@ -7,7 +7,7 @@ export const ToggleTheme = () => {
 
   return (
     <>
-      <div className="relative w-24 h-12 scale-[.6] bg-gray-500 dark:bg-slate-900 rounded-full">
+      <div className="relative w-24 h-12 scale-[.6] bg-purple-700 dark:bg-purple-900 rounded-full">
         <label className="cursor-pointer">
           <input
             type="checkbox"

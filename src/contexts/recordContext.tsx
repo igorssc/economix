@@ -1,5 +1,6 @@
 "use client";
 import { CREATE_RECORD, createRecordMutationResponse } from "@/db/createRecord";
+import { DELETE_RECORD, deleteRecordMutationResponse } from "@/db/deleteRecord";
 import {
   GET_ALL_AGGREGATIONS_BETWEEN_DATES,
   getAllAggregationsBetweenDatesQueryResponse,
@@ -95,6 +96,8 @@ type RecordData = {
     description?: string | undefined;
     date?: string | undefined;
   }) => Promise<void>;
+
+  deleteRecord: ({ id, date }: { id: string; date: string }) => Promise<void>;
 };
 
 export const RecordContext = createContext({} as RecordData);
@@ -110,6 +113,9 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
   const [updateRegisterMutateFunction] =
     useMutation<updateRecordMutationResponse>(UPDATE_RECORD);
+
+  const [deleteRegisterMutateFunction] =
+    useMutation<deleteRecordMutationResponse>(DELETE_RECORD);
 
   const { refetch: refetchGetAllRecordsFromMonthsAgo } =
     useQuery<getAllAggregationsBetweenDatesQueryResponse>(
@@ -574,6 +580,28 @@ export function RecordProvider({ children }: RecordProviderProps) {
     });
   };
 
+  const deleteRecord = async ({ id, date }: { id: string; date: string }) => {
+    await deleteRegisterMutateFunction({
+      variables: {
+        id,
+      },
+    }).then(() => {
+      if (differenceInMinutes(new Date(), new Date(date)) >= 0) {
+        setAllRecordsFromMonthsAgoByCategory((prev) => ({
+          withdraws: [...prev.withdraws].filter((v) => v.id !== id),
+          deposits: [...prev.deposits].filter((v) => v.id !== id),
+        }));
+      } else {
+        setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== id));
+        refetchGetAllRecordsInFuture({
+          email: session?.user?.email,
+          dateGTE: new Date().toISOString(),
+          skip: 0,
+        });
+      }
+    });
+  };
+
   return (
     <RecordContext.Provider
       value={{
@@ -585,6 +613,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
         allRecordsInFuture,
         createRecord,
         updateRecord,
+        deleteRecord,
       }}
     >
       {children}

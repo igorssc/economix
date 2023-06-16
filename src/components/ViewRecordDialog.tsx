@@ -1,10 +1,12 @@
 import { DialogContext } from "@/contexts/dialogsContext";
 import DialogMui from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { useContext } from "react";
-import { Button } from "./Button";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { DotsThreeVertical, X } from "@phosphor-icons/react";
+import { useContext, useState } from "react";
 
 export function ViewRecordDialog() {
   const handleClose = () => setOpen(false);
@@ -17,14 +19,84 @@ export function ViewRecordDialog() {
     setIsOpenDeleteRecordDialog,
   } = useContext(DialogContext);
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const options = [
+    {
+      label: "Editar",
+      action: () => {
+        setOpen(false);
+        setIsOpenEditRecordDialog(true);
+      },
+    },
+    {
+      label: "Deletar",
+      action: () => {
+        setOpen(false);
+        setIsOpenDeleteRecordDialog(true);
+      },
+    },
+  ];
+
   return (
     <>
       <DialogMui open={open} onClose={handleClose} fullWidth>
-        <DialogTitle>
-          {recordSelected.category === "deposit" ? "Depósito" : "Retirada"}
+        <DialogTitle className="flex items-center justify-between">
+          Exibir registro
+          <div className="flex items-center justify-center">
+            <div>
+              <IconButton
+                aria-label="more"
+                id="long-button"
+                aria-controls={openMenu ? "long-menu" : undefined}
+                aria-expanded={openMenu ? "true" : undefined}
+                aria-haspopup="true"
+                onClick={handleClick}
+              >
+                <DotsThreeVertical size={32} weight="bold" />
+              </IconButton>
+              <Menu
+                id="long-menu"
+                MenuListProps={{
+                  "aria-labelledby": "long-button",
+                }}
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleCloseMenu}
+                PaperProps={{
+                  style: {
+                    width: "20ch",
+                  },
+                }}
+              >
+                {options.map((option, index) => (
+                  <MenuItem key={index} onClick={option.action}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </div>
+            <X
+              size={26}
+              className="cursor-pointer text-black hover:text-gray-600"
+              weight="light"
+              onClick={handleClose}
+            />
+          </div>
         </DialogTitle>
         <DialogContent className="flex flex-col gap-3">
           <h1>Título: {recordSelected.title}</h1>
+          <h1>
+            Categoria:{" "}
+            {recordSelected.category === "deposit" ? "Depósito" : "Retirada"}
+          </h1>
           <h1>
             Valor:{" "}
             {recordSelected.amount?.toLocaleString("pt-br", {
@@ -41,31 +113,6 @@ export function ViewRecordDialog() {
             })}
           </h1>
         </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose} scheme="secondary" isSmall>
-            Voltar
-          </Button>
-          <Button
-            onClick={() => {
-              setOpen(false);
-              setIsOpenEditRecordDialog(true);
-            }}
-            isSmall
-          >
-            Editar
-          </Button>
-          <Button
-            autoFocus
-            onClick={() => {
-              setOpen(false);
-              setIsOpenDeleteRecordDialog(true);
-            }}
-            scheme="tertiary"
-            isSmall
-          >
-            Deletar
-          </Button>
-        </DialogActions>
       </DialogMui>
     </>
   );

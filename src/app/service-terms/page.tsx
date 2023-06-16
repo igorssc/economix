@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/Button";
 import { Envelope, Globe, WhatsappLogo } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,7 +8,7 @@ import economixLogoImg from "../../assets/economix-logo.png";
 export default function ServiceTerms() {
   return (
     <>
-      <div className="flex flex-col justify-center items-center m-auto w-[1200px] max-w-[90%] max-md:gap-4 py-4 text-gray-300">
+      <div className="flex flex-col justify-center items-center m-auto w-[1200px] max-w-[90%] max-md:gap-4 py-4 dark:text-gray-300">
         <Image
           src={economixLogoImg}
           alt="Icon EconomiX"
@@ -15,7 +16,9 @@ export default function ServiceTerms() {
           height={100}
           className="m-auto"
         />
-        <h1 className="font-black text-xl">EconomiX - Termos de serviço</h1>
+        <h1 className="font-black text-xl text-purple-800">
+          EconomiX - Termos de serviço
+        </h1>
         <small className="text-center">Última atualização: 05/06/2023</small>
         <div className="text-justify mt-4">
           <p>
@@ -154,11 +157,10 @@ export default function ServiceTerms() {
           <br />
           Agradecemos por ler e compreender nossos termos de serviço.
         </div>
-        <Link
-          href="../"
-          className="border-2 rounded-full py-2 px-5 gap-3 w-full max-w-[300px] flex items-center justify-center mt-8"
-        >
-          Voltar ao início
+        <Link href="../">
+          <Button isSmall className="px-10 mt-8">
+            Voltar ao início
+          </Button>
         </Link>
       </div>
     </>

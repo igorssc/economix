@@ -4,11 +4,42 @@ import { useContext } from "react";
 import {
   Bar,
   BarChart,
+  BarProps,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+
+const CustomBar = (props: BarProps) => {
+  const { theme } = useContext(ThemeContext);
+
+  const { x, y, width, height } = props;
+
+  return (
+    <g>
+      {/* Parte superior da barra com traçado */}
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill="url(#gradientBar)"
+        stroke={theme === "dark" ? "rgb(88,28,135)" : "rgb(126, 34, 206)"}
+        strokeWidth={1}
+      />
+      {/* Parte inferior da barra sem traçado */}
+      <rect
+        x={+(x || 0) - 2}
+        y={+(y || 0) + +(height || 0) - 2}
+        width={+(width || 0) + 4}
+        height={4}
+        fill={theme === "dark" ? "rgb(24,24,27)" : "#fff"}
+        stroke="none"
+      />
+    </g>
+  );
+};
 
 export function SimpleBarChart() {
   const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
@@ -80,8 +111,13 @@ export function SimpleBarChart() {
           tickLine={false}
         />
         <defs>
-          <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#030712" />
+          <linearGradient id="gradientBar" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="0%"
+              stopColor={
+                theme === "dark" ? "rgb(88,28,135)" : "rgb(126, 34, 206)"
+              }
+            />
             <stop offset="100%" stopColor="rgba(0, 123, 255, 0)" />
           </linearGradient>
         </defs>
@@ -89,7 +125,11 @@ export function SimpleBarChart() {
           content={renderTooltipContent}
           cursor={{ fill: "transparent" }}
         />
-        <Bar dataKey="value" fill="url(#gradient)" radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="value"
+          shape={<CustomBar dataKey="value" />}
+          radius={[4, 4, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

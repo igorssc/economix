@@ -4,12 +4,10 @@ import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
-import Input from "@mui/material/Input";
 import InputAdornment from "@mui/material/InputAdornment";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import { X } from "@phosphor-icons/react";
 import { useSnackbar } from "notistack";
 import { useContext, useState } from "react";
 import { Button } from "./Button";
@@ -152,12 +150,9 @@ export function CreateRecordDialog() {
         setDate(getCurrentDateTimeString());
         setInstallments(1);
 
-        enqueueSnackbar(
-          "Registro inserido com sucesso! Iremos atualizar em instantes.",
-          {
-            variant: "success",
-          }
-        );
+        enqueueSnackbar("Registro criado com sucesso!", {
+          variant: "success",
+        });
       });
     } catch {
       enqueueSnackbar("Houve um erro! Tente novamente, por favor!", {
@@ -177,7 +172,17 @@ export function CreateRecordDialog() {
   return (
     <>
       <DialogMui open={open} onClose={handleClose}>
-        <DialogTitle>Criar registro</DialogTitle>
+        <DialogTitle className="flex items-center justify-between">
+          Criar registro
+          <div>
+            <X
+              size={26}
+              className="cursor-pointer text-black hover:text-gray-600"
+              weight="light"
+              onClick={handleClose}
+            />
+          </div>
+        </DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
@@ -186,7 +191,7 @@ export function CreateRecordDialog() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             fullWidth
-            variant="standard"
+            variant="outlined"
           >
             {[
               { label: "Depósito", value: "deposit" },
@@ -205,7 +210,7 @@ export function CreateRecordDialog() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             fullWidth
-            variant="standard"
+            variant="outlined"
             SelectProps={{
               MenuProps: {
                 style: { maxHeight: 400 },
@@ -222,63 +227,62 @@ export function CreateRecordDialog() {
               ))}
             Título
           </TextField>
-          <FormControl fullWidth variant="standard" margin="dense">
-            <InputLabel htmlFor="amount">Valor total</InputLabel>
-            <Input
-              id="amount"
-              value={amount}
-              onChange={(e) => {
-                const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
-
-                const floatValue =
-                  String(+cleanedValue).length > 3
-                    ? String(+cleanedValue)
-                    : ("000" + String(+cleanedValue)).slice(-3);
-
-                const formatted =
-                  floatValue.slice(0, -2) + "." + floatValue.slice(-2);
-
-                setAmount(
-                  parseFloat(formatted).toLocaleString("pt-br", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })
-                );
-              }}
-              startAdornment={
-                <InputAdornment position="start">R$</InputAdornment>
-              }
-            />
-          </FormControl>
           <TextField
-            autoFocus
+            fullWidth
+            variant="outlined"
+            margin="dense"
+            label="Valor total"
+            value={amount}
+            onChange={(e) => {
+              const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+
+              const floatValue =
+                String(+cleanedValue).length > 3
+                  ? String(+cleanedValue)
+                  : ("000" + String(+cleanedValue)).slice(-3);
+
+              const formatted =
+                floatValue.slice(0, -2) + "." + floatValue.slice(-2);
+
+              setAmount(
+                parseFloat(formatted).toLocaleString("pt-br", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              );
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">R$</InputAdornment>
+              ),
+            }}
+          />
+          <TextField
             margin="dense"
             label="Parcelas"
             type="number"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={installments}
             onChange={(e) =>
               +e.target.value >= 0 && setInstallments(+e.target.value)
             }
           />
           <TextField
-            autoFocus
             margin="dense"
             label="Descrição (opcional)"
             type="text"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
           <TextField
-            autoFocus
             margin="dense"
             label="Data"
             type="datetime-local"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={date}
             onChange={(e) => {
               setDate(e.target.value);
@@ -286,9 +290,6 @@ export function CreateRecordDialog() {
           />
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleClose} scheme="secondary" isSmall>
-            Cancelar
-          </Button>
           <Button onClick={handleSubmit} isSmall disabled={isButtonDisabled}>
             {isCreatingRecord ? (
               <div className="inline-block w-7 h-7 after:content-[''] after:block after:w-full after:h-full after:rounded-[50%] after:border-4 after:border-y-white after:border-x-transparent after:animate-spin" />

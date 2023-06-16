@@ -113,7 +113,7 @@ export default function Dashboard() {
                 className="max-w-[120px]"
               />
               <h1 className="text-lg font-bold">
-                <span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-[#2f8eec] relative inline-block">
+                <span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-purple-700 dark:before:bg-purple-800 relative inline-block">
                   <span className="relative text-white uppercase">
                     {highestExpenseInTheLast30Days?.title || ""}
                   </span>
