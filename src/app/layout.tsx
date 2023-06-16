@@ -1,12 +1,10 @@
 import { Footer } from "@/components/Footer";
-import Pwa from "@/components/Pwa";
 import AuthContext from "@/contexts/authContext";
 import { DialogProvider } from "@/contexts/dialogsContext";
 import { RecordProvider } from "@/contexts/recordContext";
 import { ThemeProvider } from "@/contexts/themeContext";
 import { Apollo } from "@/lib/apollo";
 import { Inter } from "next/font/google";
-import Head from "next/head";
 import "../style/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -24,12 +22,10 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="pt-br">
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <head>
         <meta name="theme-color" content="rgb(29, 4, 49)" />
         <link rel="manifest" href="/manifest.json" />
-      </Head>
-      <Pwa />
+      </head>
       <AuthContext>
         <Apollo>
           <RecordProvider>

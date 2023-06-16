@@ -5,6 +5,11 @@ const withPWA = require("next-pwa")({
 });
 
 module.exports = withPWA({
+  pwa: {
+    dest: "public",
+    register: true,
+    sw: "service-worker.js",
+  },
   images: {
     domains: ["lh3.googleusercontent.com", "platform-lookaside.fbsbx.com"],
   },
