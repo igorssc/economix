@@ -1,13 +1,5 @@
 export const optionsTitle = {
-  depositsOptions: [
-    "Salário",
-    "Serviço",
-    "Loteria",
-    "Aposta",
-    "Prêmiação",
-    "Outros",
-    "FGTS",
-  ]
+  depositsOptions: ["Salário", "Serviço", "Prêmiação", "Outros"]
     .filter(function (elem, pos, self) {
       return self.indexOf(elem) == pos;
     })
@@ -37,6 +29,8 @@ export const optionsTitle = {
     "Móvel",
     "Aparelho eletrônico",
     "Ferramenta",
+    "Loteria",
+    "Farmácia",
   ]
     .filter(function (elem, pos, self) {
       return self.indexOf(elem) == pos;

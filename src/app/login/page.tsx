@@ -48,7 +48,7 @@ export default function Login() {
                   width={20}
                   height={20}
                 />
-                Login com Facebook
+                Continuar com Facebook
               </button>
               <button
                 onClick={() => signIn("google")}
@@ -60,7 +60,7 @@ export default function Login() {
                   width={20}
                   height={20}
                 />
-                Login com Google
+                Continuar com Google
               </button>
             </div>
           </div>
