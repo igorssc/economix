@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
-export function MultiLineChart() {
+export function AnnualDataChart() {
   const { allRecordsFromMonthsAgoByMonth } = useContext(RecordContext);
   const { theme } = useContext(ThemeContext);
 
@@ -29,11 +29,11 @@ export function MultiLineChart() {
           name: new Date(
             new Date().setMonth(new Date().getMonth() - i)
           ).toLocaleDateString("pt-br", { month: "long" }),
-          value1: allRecordsFromMonthsAgoByMonth[i].values.deposits.reduce(
+          value1: allRecordsFromMonthsAgoByMonth[i].values.revenues.reduce(
             (acc, v) => (acc += v.amount),
             0
           ),
-          value2: allRecordsFromMonthsAgoByMonth[i].values.withdraws.reduce(
+          value2: allRecordsFromMonthsAgoByMonth[i].values.expenditures.reduce(
             (acc, v) => (acc += v.amount),
             0
           ),
@@ -61,17 +61,17 @@ export function MultiLineChart() {
           {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
           <br />
           R$ {value1.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
-          (Depósitos)
+          (Receitas)
           <br />
           R$ {value2.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
-          (Saques)
+          (Despesas)
         </div>
       );
     }
     return null;
   };
 
-  const CustomizedDotDeposit = (props: any) => {
+  const CustomizedDotRevenue = (props: any) => {
     const { cx, cy, stroke, payload, value } = props;
 
     if (value[1] >= payload.value2) {
@@ -91,7 +91,7 @@ export function MultiLineChart() {
     return null;
   };
 
-  const CustomizedDotWithdraw = (props: any) => {
+  const CustomizedDotExpenditure = (props: any) => {
     const { cx, cy, stroke, payload, value } = props;
 
     if (value[1] > payload.value1) {
@@ -161,14 +161,14 @@ export function MultiLineChart() {
           dataKey="value2"
           fill="url(#gradient2)"
           stroke={theme === "dark" ? "rgb(115, 5, 5)" : "rgb(159, 2, 2)"}
-          dot={<CustomizedDotWithdraw />}
+          dot={<CustomizedDotExpenditure />}
         />
         <Area
           type="monotone"
           dataKey="value1"
           fill="url(#gradient1)"
           stroke={theme === "dark" ? "rgb(67, 14, 110)" : "rgb(126, 34, 206)"}
-          dot={<CustomizedDotDeposit />}
+          dot={<CustomizedDotRevenue />}
         />
       </AreaChart>
     </ResponsiveContainer>

@@ -49,7 +49,12 @@ export function ViewRecordDialog() {
     <>
       <DialogMui open={open} onClose={handleClose} fullWidth>
         <DialogTitle className="flex items-center justify-between">
-          Exibir registro
+          <div>
+            Exibir registro{" "}
+            <small className="bg-purple-700 rounded-xl px-3 py-[0.125rem] text-white ml-2 text-xs">
+              {recordSelected.category === "revenue" ? "Receita" : "Despesa"}
+            </small>
+          </div>
           <div className="flex items-center justify-center">
             <div>
               <IconButton
@@ -93,10 +98,6 @@ export function ViewRecordDialog() {
         </DialogTitle>
         <DialogContent className="flex flex-col gap-3">
           <h1>Título: {recordSelected.title}</h1>
-          <h1>
-            Categoria:{" "}
-            {recordSelected.category === "deposit" ? "Depósito" : "Retirada"}
-          </h1>
           <h1>
             Valor:{" "}
             {recordSelected.amount?.toLocaleString("pt-br", {

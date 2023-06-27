@@ -51,6 +51,8 @@ export function EditRecordDialog() {
   const [description, setDescription] = useState<string>();
   const [date, setDate] = useState(getCurrentDateTimeString());
 
+  const [options, setOptions] = useState<string[]>([]);
+
   const [isEditingRecord, setIsEditingRecord] = useState(false);
 
   const handleClose = () => setOpen(false);
@@ -58,6 +60,19 @@ export function EditRecordDialog() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   useEffect(() => {
+    const prevOptions =
+      optionsTitle[
+        recordSelected.category === "revenue"
+          ? "revenuesOptions"
+          : "expendituresOptions"
+      ];
+
+    if (!prevOptions.some((v) => v === recordSelected.title)) {
+      prevOptions.push(recordSelected.title);
+    }
+
+    setOptions(prevOptions);
+
     setCategory(recordSelected.category);
     setTitle(recordSelected.title);
     setAmount(
@@ -168,8 +183,8 @@ export function EditRecordDialog() {
             variant="outlined"
           >
             {[
-              { label: "Depósito", value: "deposit" },
-              { label: "Retirada", value: "withdraw" },
+              { label: "Receita", value: "revenue" },
+              { label: "Despesa", value: "expenditure" },
             ].map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
@@ -192,9 +207,7 @@ export function EditRecordDialog() {
             }}
           >
             {category &&
-              optionsTitle[
-                category === "deposit" ? "depositsOptions" : "withdrawsOptions"
-              ].map((option) => (
+              options.map((option) => (
                 <MenuItem key={option} value={option}>
                   {option}
                 </MenuItem>

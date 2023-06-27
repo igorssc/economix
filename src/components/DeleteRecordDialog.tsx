@@ -60,7 +60,7 @@ export function DeleteRecordDialog() {
           <h1>Título: {recordSelected.title}</h1>
           <h1>
             Categoria:{" "}
-            {recordSelected.category === "deposit" ? "Depósito" : "Retirada"}
+            {recordSelected.category === "revenue" ? "Receita" : "Despesa"}
           </h1>
           <h1>
             Valor:{" "}

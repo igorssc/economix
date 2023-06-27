@@ -38,8 +38,8 @@ export type RecordType = {
 type RecordData = {
   countAllRecordsFromMonthsAgoByCategory: {
     monthsAgo: number;
-    deposit: number;
-    withdraw: number;
+    revenue: number;
+    expenditure: number;
   }[];
 
   allRecordsFrom30DaysAgo: RecordType[];
@@ -49,20 +49,21 @@ type RecordData = {
   countAllQuantitiesAndAmountOf30DaysAgoByTitle: {
     title: string;
     quantity: number;
+    category: string;
     totalAmount: number;
   }[];
 
   allRecordsFromMonthsAgoByMonth: {
     monthAgo: number;
     values: {
-      deposits: RecordType[];
-      withdraws: RecordType[];
+      revenues: RecordType[];
+      expenditures: RecordType[];
     };
   }[];
 
   allRecordsFromMonthsAgoByCategory: {
-    deposits: RecordType[];
-    withdraws: RecordType[];
+    revenues: RecordType[];
+    expenditures: RecordType[];
   };
 
   createRecord: ({
@@ -135,8 +136,8 @@ export function RecordProvider({ children }: RecordProviderProps) {
   ] = useState(
     Array.from({ length: 12 }, (_, i) => ({
       monthsAgo: i,
-      deposit: 0,
-      withdraw: 0,
+      revenue: 0,
+      expenditure: 0,
     }))
   );
 
@@ -144,13 +145,21 @@ export function RecordProvider({ children }: RecordProviderProps) {
     countAllQuantitiesAndAmountOf30DaysAgoByTitle,
     setCountAllQuantitiesAndAmountOf30DaysAgoByTitle,
   ] = useState(
-    [] as { title: string; quantity: number; totalAmount: number }[]
+    [] as {
+      title: string;
+      quantity: number;
+      category: string;
+      totalAmount: number;
+    }[]
   );
 
   const [
     allRecordsFromMonthsAgoByCategory,
     setAllRecordsFromMonthsAgoByCategory,
-  ] = useState({ deposits: [] as RecordType[], withdraws: [] as RecordType[] });
+  ] = useState({
+    revenues: [] as RecordType[],
+    expenditures: [] as RecordType[],
+  });
 
   const [allRecordsFrom30DaysAgo, setAllRecordsFrom30DaysAgo] = useState(
     [] as RecordType[]
@@ -164,7 +173,10 @@ export function RecordProvider({ children }: RecordProviderProps) {
     useState(
       Array.from({ length: 12 }, (_, i) => ({
         monthAgo: i,
-        values: { deposits: [] as RecordType[], withdraws: [] as RecordType[] },
+        values: {
+          revenues: [] as RecordType[],
+          expenditures: [] as RecordType[],
+        },
       }))
     );
 
@@ -181,13 +193,13 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
     allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 0)
-      ?.values.withdraws.forEach((v) => {
+      ?.values.expenditures.forEach((v) => {
         setAllRecordsFrom30DaysAgo((prev) => [...prev, v]);
       });
 
     allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 1)
-      ?.values.withdraws.forEach((v) => {
+      ?.values.expenditures.forEach((v) => {
         const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
           unit: "day",
           addSuffix: false,
@@ -202,13 +214,13 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
     allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 0)
-      ?.values.deposits.forEach((v) => {
+      ?.values.revenues.forEach((v) => {
         setAllRecordsFrom30DaysAgo((prev) => [...prev, v]);
       });
 
     allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 1)
-      ?.values.deposits.forEach((v) => {
+      ?.values.revenues.forEach((v) => {
         const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
           unit: "day",
           addSuffix: false,
@@ -233,6 +245,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
     const prevArray = [] as {
       title: string;
+      category: string;
       quantity: number;
       totalAmount: number;
     }[];
@@ -245,17 +258,19 @@ export function RecordProvider({ children }: RecordProviderProps) {
               .indexOf(v.title.toLowerCase())
           : -1;
 
-      if (valueIndex > -1) {
+      if (valueIndex > -1 && prevArray[valueIndex].category === v.category) {
         prevArray[valueIndex] = {
-          title: v.title.toLowerCase(),
+          title: v.title,
           quantity: prevArray[valueIndex].quantity + 1,
           totalAmount: prevArray[valueIndex].totalAmount + v.amount,
+          category: prevArray[valueIndex].category,
         };
       } else {
         prevArray.push({
-          title: v.title.toLowerCase(),
+          title: v.title,
           quantity: 1,
           totalAmount: v.amount,
+          category: v.category,
         });
       }
     });
@@ -270,18 +285,18 @@ export function RecordProvider({ children }: RecordProviderProps) {
       setCountAllRecordsFromMonthsAgoByCategory(
         Array.from({ length: 12 }, (_, i) => ({
           monthsAgo: i,
-          deposit: 0,
-          withdraw: 0,
+          revenue: 0,
+          expenditure: 0,
         }))
       );
 
       const isFirstRender =
-        allRecordsFromMonthsAgoByCategory.deposits.length === 0 &&
-        allRecordsFromMonthsAgoByCategory.withdraws.length === 0;
+        allRecordsFromMonthsAgoByCategory.revenues.length === 0 &&
+        allRecordsFromMonthsAgoByCategory.expenditures.length === 0;
 
       const prevArray = {
-        deposits: [] as RecordType[],
-        withdraws: [] as RecordType[],
+        revenues: [] as RecordType[],
+        expenditures: [] as RecordType[],
       };
 
       Array.from({ length: 12 }, (_, i) => {
@@ -297,24 +312,24 @@ export function RecordProvider({ children }: RecordProviderProps) {
             });
 
             result.data.recordsConnection.edges.forEach((v) => {
-              if (v.node.category === "withdraw") {
+              if (v.node.category === "expenditure") {
                 if (isFirstRender) {
                   setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                    deposits: [...prev.deposits],
-                    withdraws: [...prev.withdraws, v.node as RecordType],
+                    revenues: [...prev.revenues],
+                    expenditures: [...prev.expenditures, v.node as RecordType],
                   }));
                 } else {
-                  prevArray.withdraws.push(v.node as RecordType);
+                  prevArray.expenditures.push(v.node as RecordType);
                 }
               }
-              if (v.node.category === "deposit") {
+              if (v.node.category === "revenue") {
                 if (isFirstRender) {
                   setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                    withdraws: [...prev.withdraws],
-                    deposits: [...prev.deposits, v.node as RecordType],
+                    expenditures: [...prev.expenditures],
+                    revenues: [...prev.revenues, v.node as RecordType],
                   }));
                 } else {
-                  prevArray.deposits.push(v.node as RecordType);
+                  prevArray.revenues.push(v.node as RecordType);
                 }
               }
             });
@@ -350,12 +365,15 @@ export function RecordProvider({ children }: RecordProviderProps) {
     setAllRecordsFromMonthsAgoByMonth(
       Array.from({ length: 12 }, (_, i) => ({
         monthAgo: i,
-        values: { deposits: [] as RecordType[], withdraws: [] as RecordType[] },
+        values: {
+          revenues: [] as RecordType[],
+          expenditures: [] as RecordType[],
+        },
       }))
     );
 
-    if (allRecordsFromMonthsAgoByCategory.deposits.length > 0) {
-      allRecordsFromMonthsAgoByCategory.deposits.forEach((v, i) => {
+    if (allRecordsFromMonthsAgoByCategory.revenues.length > 0) {
+      allRecordsFromMonthsAgoByCategory.revenues.forEach((v, i) => {
         const distanceInMonths = +formatDistanceStrict(
           new Date(),
           new Date(v.date),
@@ -372,8 +390,10 @@ export function RecordProvider({ children }: RecordProviderProps) {
             newArray[distanceInMonths] = {
               ...newArray[distanceInMonths],
               values: {
-                deposits: [...newArray[distanceInMonths].values.deposits, v],
-                withdraws: [...newArray[distanceInMonths].values.withdraws],
+                revenues: [...newArray[distanceInMonths].values.revenues, v],
+                expenditures: [
+                  ...newArray[distanceInMonths].values.expenditures,
+                ],
               },
             };
 
@@ -383,8 +403,10 @@ export function RecordProvider({ children }: RecordProviderProps) {
             newArray[distanceInMonths] = {
               ...newArray[distanceInMonths],
               values: {
-                deposits: [...newArray[distanceInMonths].values.deposits, v],
-                withdraws: [...newArray[distanceInMonths].values.withdraws],
+                revenues: [...newArray[distanceInMonths].values.revenues, v],
+                expenditures: [
+                  ...newArray[distanceInMonths].values.expenditures,
+                ],
               },
             };
           }
@@ -392,8 +414,8 @@ export function RecordProvider({ children }: RecordProviderProps) {
         });
       });
     }
-    if (allRecordsFromMonthsAgoByCategory.withdraws.length > 0) {
-      allRecordsFromMonthsAgoByCategory.withdraws.forEach((v, i) => {
+    if (allRecordsFromMonthsAgoByCategory.expenditures.length > 0) {
+      allRecordsFromMonthsAgoByCategory.expenditures.forEach((v, i) => {
         const distanceInMonths = +formatDistanceStrict(
           new Date(),
           new Date(v.date),
@@ -410,8 +432,11 @@ export function RecordProvider({ children }: RecordProviderProps) {
             newArray[distanceInMonths] = {
               ...newArray[distanceInMonths],
               values: {
-                deposits: [...newArray[distanceInMonths].values.deposits],
-                withdraws: [...newArray[distanceInMonths].values.withdraws, v],
+                revenues: [...newArray[distanceInMonths].values.revenues],
+                expenditures: [
+                  ...newArray[distanceInMonths].values.expenditures,
+                  v,
+                ],
               },
             };
             return newArray;
@@ -421,8 +446,11 @@ export function RecordProvider({ children }: RecordProviderProps) {
             newArray[distanceInMonths] = {
               ...newArray[distanceInMonths],
               values: {
-                deposits: [...newArray[distanceInMonths].values.deposits],
-                withdraws: [...newArray[distanceInMonths].values.withdraws, v],
+                revenues: [...newArray[distanceInMonths].values.revenues],
+                expenditures: [
+                  ...newArray[distanceInMonths].values.expenditures,
+                  v,
+                ],
               },
             };
           }
@@ -473,23 +501,23 @@ export function RecordProvider({ children }: RecordProviderProps) {
                 new Date(new Date(date).setMonth(new Date(date).getMonth() + i))
               ) >= 0
             ) {
-              if (category === "deposit") {
+              if (category === "revenue") {
                 setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                  withdraws: [...prev.withdraws],
-                  deposits: [
-                    ...prev.deposits,
+                  expenditures: [...prev.expenditures],
+                  revenues: [
+                    ...prev.revenues,
                     response.data?.createRecord as RecordType,
                   ],
                 }));
               }
 
-              if (category === "withdraw") {
+              if (category === "expenditure") {
                 setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                  withdraws: [
-                    ...prev.withdraws,
+                  expenditures: [
+                    ...prev.expenditures,
                     response.data?.createRecord as RecordType,
                   ],
-                  deposits: [...prev.deposits],
+                  revenues: [...prev.revenues],
                 }));
               }
             } else {
@@ -535,8 +563,8 @@ export function RecordProvider({ children }: RecordProviderProps) {
         },
       }).then(() => {
         setAllRecordsFromMonthsAgoByCategory((prev) => ({
-          withdraws: [...prev.withdraws].filter((v) => v.id !== id),
-          deposits: [...prev.deposits].filter((v) => v.id !== id),
+          expenditures: [...prev.expenditures].filter((v) => v.id !== id),
+          revenues: [...prev.revenues].filter((v) => v.id !== id),
         }));
 
         setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== id));
@@ -547,23 +575,23 @@ export function RecordProvider({ children }: RecordProviderProps) {
             new Date(response.data?.updateRecord.date || "")
           ) >= 0
         ) {
-          if (response.data?.updateRecord.category === "deposit") {
+          if (response.data?.updateRecord.category === "revenue") {
             setAllRecordsFromMonthsAgoByCategory((prev) => ({
-              withdraws: [...prev.withdraws],
-              deposits: [
-                ...prev.deposits,
+              expenditures: [...prev.expenditures],
+              revenues: [
+                ...prev.revenues,
                 response.data?.updateRecord as RecordType,
               ],
             }));
           }
 
-          if (response.data?.updateRecord.category === "withdraw") {
+          if (response.data?.updateRecord.category === "expenditure") {
             setAllRecordsFromMonthsAgoByCategory((prev) => ({
-              withdraws: [
-                ...prev.withdraws,
+              expenditures: [
+                ...prev.expenditures,
                 response.data?.updateRecord as RecordType,
               ],
-              deposits: [...prev.deposits],
+              revenues: [...prev.revenues],
             }));
           }
         } else {
@@ -588,8 +616,8 @@ export function RecordProvider({ children }: RecordProviderProps) {
     }).then(() => {
       if (differenceInMinutes(new Date(), new Date(date)) >= 0) {
         setAllRecordsFromMonthsAgoByCategory((prev) => ({
-          withdraws: [...prev.withdraws].filter((v) => v.id !== id),
-          deposits: [...prev.deposits].filter((v) => v.id !== id),
+          expenditures: [...prev.expenditures].filter((v) => v.id !== id),
+          revenues: [...prev.revenues].filter((v) => v.id !== id),
         }));
       } else {
         setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== id));

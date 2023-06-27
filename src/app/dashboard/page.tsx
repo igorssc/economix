@@ -1,13 +1,14 @@
 "use client";
 import reminderImg from "@/assets/reminder.svg";
+import { AnnualDataChart } from "@/components/AnnualDataChart";
 import { Box } from "@/components/Box";
 import { Button } from "@/components/Button";
-import { MultiLineChart } from "@/components/MultiLineChart";
+import { CurrentMonthChart } from "@/components/CurrentMonthChart";
+import { DayByTimeChartChart } from "@/components/DayByTimeChartChart";
+import { ExpenseChart } from "@/components/ExpenseChart";
+import { MonthlyProfitChart } from "@/components/MonthlyProfitChart";
 import { Nav } from "@/components/Nav";
 import { NewRegisterButton } from "@/components/NewRegisterButton";
-import { SimpleBarChart } from "@/components/SimpleBarChart";
-import { SimpleLineChart } from "@/components/SimpleLineChart";
-import { SimpleScatterChart } from "@/components/SimpleScatterChart";
 import { SkeletonDashboard } from "@/components/SkeletonDashboard";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
 import { TableRankingRecords } from "@/components/TableRankingRecords";
@@ -51,7 +52,7 @@ export default function Dashboard() {
         quantity: number;
         totalAmount: number;
       }[] = allRecordsFrom30DaysAgo
-        .filter((v) => v.category === "withdraw")
+        .filter((v) => v.category === "expenditure")
         .reduce(
           (acc, v) => {
             const indexExists = acc.findIndex((v1) => v1.title === v.title);
@@ -109,8 +110,8 @@ export default function Dashboard() {
 
   if (
     !(
-      allRecordsFromMonthsAgoByCategory.deposits.length > 0 ||
-      allRecordsFromMonthsAgoByCategory.withdraws.length > 0
+      allRecordsFromMonthsAgoByCategory.revenues.length > 0 ||
+      allRecordsFromMonthsAgoByCategory.expenditures.length > 0
     )
   ) {
     return (
@@ -148,7 +149,7 @@ export default function Dashboard() {
         <main className="max-w-[1280px] p-4 m-auto">
           <SummarizedMonthlyExpensesIndex />
 
-          <MultiLineChart />
+          <AnnualDataChart />
           <div className="flex flex-col sm:grid sm:grid-cols-6 md:col-span-2 gap-4 mt-4">
             <Box className="flex flex-col gap-4 items-center justify-center sm:col-span-6 md:col-span-2">
               <Image
@@ -179,36 +180,49 @@ export default function Dashboard() {
             </Box>
             <Box className="sm:col-span-3 md:col-span-2">
               <h1 className="text-center">Quantidade de gastos mensais</h1>
-              <SimpleBarChart />
+              <ExpenseChart />
             </Box>
             <Box className="sm:col-span-3 md:col-span-2">
               <h1 className="text-center">Lucro mensal</h1>
-              <SimpleLineChart />
+              <MonthlyProfitChart />
             </Box>
             <Box className="col-span-6">
               <h1 className="text-center">Registros - Dia x Hora</h1>
-              <SimpleScatterChart />
+              <DayByTimeChartChart />
             </Box>
 
             <Box className="sm:col-span-6 md:col-span-3">
               <h1 className="text-center mb-4">Útimos registros</h1>
               <div className="relative overflow-x-auto">
-                <TableRecords records={allRecordsFrom30DaysAgo} />
+                <TableRecords
+                  records={allRecordsFrom30DaysAgo}
+                  isHideDescription
+                />
               </div>
             </Box>
 
             <div className="sm:col-span-6 md:col-span-3 flex flex-col gap-4">
               <Box className="max-md:order-1">
+                <h1 className="text-center mb-4">Registros do mês atual</h1>
+
+                <div className="relative overflow-x-auto">
+                  <CurrentMonthChart />
+                </div>
+              </Box>
+              <Box className="max-md:order-2">
                 <h1 className="text-center mb-4">Ranking de registros</h1>
 
                 <div className="relative overflow-x-auto">
                   <TableRankingRecords />
                 </div>
               </Box>
-              <Box className="max-md:order-2">
+              <Box className="max-md:order-3">
                 <h1 className="text-center mb-4">Registros futuros</h1>
                 <div className="relative overflow-x-auto">
-                  <TableRecords records={allRecordsInFuture} />
+                  <TableRecords
+                    records={allRecordsInFuture}
+                    isHideDescription
+                  />
                 </div>
               </Box>
             </div>

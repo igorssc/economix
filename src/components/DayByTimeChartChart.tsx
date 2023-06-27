@@ -11,15 +11,15 @@ import {
   YAxis,
 } from "recharts";
 
-export function SimpleScatterChart() {
+export function DayByTimeChartChart() {
   const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
   const { theme } = useContext(ThemeContext);
 
-  const [dataWithdraws, setDataWithdraws] = useState(
+  const [dataExpenditures, setDataExpenditures] = useState(
     [] as { x: number; y: number }[]
   );
 
-  const [dataDeposits, setDataDeposits] = useState(
+  const [dataRevenues, setDataRevenues] = useState(
     [] as { x: number; y: number }[]
   );
 
@@ -30,8 +30,8 @@ export function SimpleScatterChart() {
         addSuffix: false,
       }).split(" ")[0];
 
-      if (v.category === "deposit") {
-        setDataDeposits((prev) => [
+      if (v.category === "revenue") {
+        setDataRevenues((prev) => [
           ...prev,
           {
             x: distance,
@@ -41,7 +41,7 @@ export function SimpleScatterChart() {
           },
         ]);
       } else {
-        setDataWithdraws((prev) => [
+        setDataExpenditures((prev) => [
           ...prev,
           {
             x: distance,
@@ -126,11 +126,11 @@ export function SimpleScatterChart() {
           content={renderTooltipContent}
         />
         <Scatter
-          data={dataDeposits}
+          data={dataRevenues}
           fill={theme === "dark" ? "rgb(107,33,168)" : "rgb(126, 34, 206)"}
         />
         <Scatter
-          data={dataWithdraws}
+          data={dataExpenditures}
           fill={theme === "dark" ? "rgba(174, 4, 4,0.5)" : "rgb(174, 4, 4)"}
         />
       </ScatterChart>

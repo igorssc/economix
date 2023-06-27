@@ -149,8 +149,8 @@ export function CreateRecordDialog() {
             variant="outlined"
           >
             {[
-              { label: "Depósito", value: "deposit" },
-              { label: "Retirada", value: "withdraw" },
+              { label: "Receita", value: "revenue" },
+              { label: "Despesa", value: "expenditure" },
             ].map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
@@ -174,7 +174,9 @@ export function CreateRecordDialog() {
           >
             {category &&
               optionsTitle[
-                category === "deposit" ? "depositsOptions" : "withdrawsOptions"
+                category === "revenue"
+                  ? "revenuesOptions"
+                  : "expendituresOptions"
               ].map((option) => (
                 <MenuItem key={option} value={option}>
                   {option}
@@ -214,7 +216,7 @@ export function CreateRecordDialog() {
           />
           <TextField
             margin="dense"
-            label="Parcelas"
+            label="Compra foi dividida em quantas parcelas?"
             type="number"
             fullWidth
             variant="outlined"

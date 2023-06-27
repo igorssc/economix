@@ -10,21 +10,21 @@ export function SummarizedMonthlyExpensesIndex() {
 
   const [isHideValues, setIsHideValues] = useState(true);
 
-  const monthlyDepositValuesComparison =
+  const monthlyRevenueValuesComparison =
     (allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 0)
-      ?.values.deposits.reduce((acc, v) => (acc += v.amount), 0) || 0) -
+      ?.values.revenues.reduce((acc, v) => (acc += v.amount), 0) || 0) -
     (allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 1)
-      ?.values.deposits.reduce((acc, v) => (acc += v.amount), 0) || 0);
+      ?.values.revenues.reduce((acc, v) => (acc += v.amount), 0) || 0);
 
-  const monthlyWithdrawValuesComparison =
+  const monthlyExpenditureValuesComparison =
     (allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 0)
-      ?.values.withdraws.reduce((acc, v) => (acc += v.amount), 0) || 0) -
+      ?.values.expenditures.reduce((acc, v) => (acc += v.amount), 0) || 0) -
     (allRecordsFromMonthsAgoByMonth
       .find((v) => v.monthAgo === 1)
-      ?.values.withdraws.reduce((acc, v) => (acc += v.amount), 0) || 0);
+      ?.values.expenditures.reduce((acc, v) => (acc += v.amount), 0) || 0);
 
   useEffect(() => {
     const isInitValueHideValues = localStorage.getItem("isHideValues");
@@ -48,7 +48,7 @@ export function SummarizedMonthlyExpensesIndex() {
               R${" "}
               {allRecordsFromMonthsAgoByMonth
                 .find((v) => v.monthAgo === 0)
-                ?.values.withdraws.reduce((acc, v) => acc + v.amount, 0)
+                ?.values.expenditures.reduce((acc, v) => acc + v.amount, 0)
                 .toLocaleString("pt-br", { minimumFractionDigits: 2 })}
             </span>
             {isHideValues ? (
@@ -77,7 +77,7 @@ export function SummarizedMonthlyExpensesIndex() {
 
         <div className="flex justify-center gap-10">
           <BaseSummarizedMonthlyExpensesIndex
-            title={Math.abs(monthlyDepositValuesComparison).toLocaleString(
+            title={Math.abs(monthlyRevenueValuesComparison).toLocaleString(
               "pt-br",
               {
                 style: "currency",
@@ -85,13 +85,13 @@ export function SummarizedMonthlyExpensesIndex() {
               }
             )}
             description={`${
-              monthlyDepositValuesComparison > 0 ? "A mais" : "A menos"
-            } de depósitos este mês`}
-            _icon={monthlyDepositValuesComparison > 0 ? ArrowUp : ArrowDown}
+              monthlyRevenueValuesComparison > 0 ? "A mais" : "A menos"
+            } de receitas este mês`}
+            _icon={monthlyRevenueValuesComparison > 0 ? ArrowUp : ArrowDown}
             isHideValues={isHideValues}
           />
           <BaseSummarizedMonthlyExpensesIndex
-            title={Math.abs(monthlyWithdrawValuesComparison).toLocaleString(
+            title={Math.abs(monthlyExpenditureValuesComparison).toLocaleString(
               "pt-br",
               {
                 style: "currency",
@@ -99,9 +99,9 @@ export function SummarizedMonthlyExpensesIndex() {
               }
             )}
             description={`${
-              monthlyWithdrawValuesComparison > 0 ? "A mais" : "A menos"
-            } de retiradas este mês`}
-            _icon={monthlyWithdrawValuesComparison > 0 ? ArrowUp : ArrowDown}
+              monthlyExpenditureValuesComparison > 0 ? "A mais" : "A menos"
+            } de despesas este mês`}
+            _icon={monthlyExpenditureValuesComparison > 0 ? ArrowUp : ArrowDown}
             invert
             isHideValues={isHideValues}
           />

@@ -3,6 +3,7 @@ import { CreateRecordDialog } from "@/components/CreateRecordDialog";
 import { DeleteRecordDialog } from "@/components/DeleteRecordDialog";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { ViewRecordDialog } from "@/components/ViewRecordDialog";
+import { ViewRecordsByTitleDialog } from "@/components/ViewRecordsByTitleDialog";
 import { SnackbarProvider } from "notistack";
 import {
   Dispatch,
@@ -28,6 +29,18 @@ interface DialogData {
   setIsOpenDeleteRecordDialog: Dispatch<SetStateAction<boolean>>;
   recordSelected: RecordType;
   setRecordSelected: Dispatch<SetStateAction<RecordType>>;
+  isOpenViewRecordsByTitleDialog: boolean;
+  setIsOpenViewRecordsByTitleDialog: Dispatch<SetStateAction<boolean>>;
+  titleSelected: {
+    title: string;
+    category: string;
+  };
+  setTitleSelected: Dispatch<
+    SetStateAction<{
+      title: string;
+      category: string;
+    }>
+  >;
 }
 
 export const DialogContext = createContext({} as DialogData);
@@ -39,6 +52,13 @@ export function DialogProvider({ children }: DialogProviderProps) {
   const [isOpenEditRecordDialog, setIsOpenEditRecordDialog] = useState(false);
   const [isOpenDeleteRecordDialog, setIsOpenDeleteRecordDialog] =
     useState(false);
+  const [isOpenViewRecordsByTitleDialog, setIsOpenViewRecordsByTitleDialog] =
+    useState(false);
+
+  const [titleSelected, setTitleSelected] = useState({
+    title: "",
+    category: "",
+  });
 
   const [recordSelected, setRecordSelected] = useState({} as RecordType);
 
@@ -55,6 +75,10 @@ export function DialogProvider({ children }: DialogProviderProps) {
         setIsOpenEditRecordDialog,
         isOpenDeleteRecordDialog,
         setIsOpenDeleteRecordDialog,
+        isOpenViewRecordsByTitleDialog,
+        setIsOpenViewRecordsByTitleDialog,
+        titleSelected,
+        setTitleSelected,
       }}
     >
       <>
@@ -66,6 +90,8 @@ export function DialogProvider({ children }: DialogProviderProps) {
           {isOpenEditRecordDialog && <EditRecordDialog />}
 
           {isOpenDeleteRecordDialog && <DeleteRecordDialog />}
+
+          {isOpenViewRecordsByTitleDialog && <ViewRecordsByTitleDialog />}
         </SnackbarProvider>
         {children}
       </>
