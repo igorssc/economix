@@ -23,7 +23,6 @@ export function ViewRecordsByTitleDialog() {
       <DialogMui open={open} onClose={handleClose} fullWidth>
         <DialogTitle className="flex items-center justify-between">
           <div>
-            Exibir registros -{" "}
             {titleSelected.title.charAt(0).toUpperCase() +
               titleSelected.title.slice(1).toLowerCase()}
             <small className="bg-purple-700 rounded-xl px-3 py-[0.125rem] text-white ml-2 text-xs">

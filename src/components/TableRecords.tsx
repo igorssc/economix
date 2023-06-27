@@ -196,7 +196,9 @@ export function TableRecords({
                 {!isHideDate && (
                   <td>{new Date(value.date).toLocaleDateString("pt-br")}</td>
                 )}
-                {!isHideDescription && <td>{value.description}</td>}
+                {!isHideDescription && (
+                  <td className="whitespace-nowrap">{value.description}</td>
+                )}
               </tr>
             ))}
         </tbody>
