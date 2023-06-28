@@ -191,7 +191,7 @@ export default function Dashboard() {
               <DayByTimeChartChart />
             </Box>
 
-            <Box className="sm:col-span-6 md:col-span-3">
+            <Box className="sm:col-span-6 md:col-span-3 md:row-span-6 max-md:order-2">
               <h1 className="text-center mb-4">Útimos registros</h1>
               <div className="relative overflow-x-auto">
                 <TableRecords
@@ -201,31 +201,26 @@ export default function Dashboard() {
               </div>
             </Box>
 
-            <div className="sm:col-span-6 md:col-span-3 flex flex-col gap-4">
-              <Box className="max-md:order-1">
-                <h1 className="text-center mb-4">Registros do mês atual</h1>
+            <Box className="sm:col-span-6 md:col-span-3 max-md:order-1">
+              <h1 className="text-center mb-4">Registros do mês atual</h1>
 
-                <div className="relative overflow-x-auto">
-                  <CurrentMonthChart />
-                </div>
-              </Box>
-              <Box className="max-md:order-2">
-                <h1 className="text-center mb-4">Ranking de registros</h1>
+              <div className="relative overflow-x-auto">
+                <CurrentMonthChart />
+              </div>
+            </Box>
+            <Box className="sm:col-span-6 md:col-span-3 max-md:order-3">
+              <h1 className="text-center mb-4">Ranking de registros</h1>
 
-                <div className="relative overflow-x-auto">
-                  <TableRankingRecords />
-                </div>
-              </Box>
-              <Box className="max-md:order-3">
-                <h1 className="text-center mb-4">Registros futuros</h1>
-                <div className="relative overflow-x-auto">
-                  <TableRecords
-                    records={allRecordsInFuture}
-                    isHideDescription
-                  />
-                </div>
-              </Box>
-            </div>
+              <div className="relative overflow-x-auto">
+                <TableRankingRecords />
+              </div>
+            </Box>
+            <Box className="sm:col-span-6 md:col-span-3 max-md:order-4">
+              <h1 className="text-center mb-4">Registros futuros</h1>
+              <div className="relative overflow-x-auto">
+                <TableRecords records={allRecordsInFuture} isHideDescription />
+              </div>
+            </Box>
           </div>
         </main>
       </SnackbarProvider>

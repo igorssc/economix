@@ -1,10 +1,11 @@
 import { DialogContext } from "@/contexts/dialogsContext";
-import { RecordContext } from "@/contexts/recordContext";
+import { RecordContext, RecordType } from "@/contexts/recordContext";
 import DialogMui from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { X } from "@phosphor-icons/react";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
+import { DetailsByTitleChart } from "./DetailsByTitleChart";
 import { TableRecords } from "./TableRecords";
 
 export function ViewRecordsByTitleDialog() {
@@ -17,6 +18,18 @@ export function ViewRecordsByTitleDialog() {
   } = useContext(DialogContext);
 
   const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
+
+  const [data, setData] = useState<RecordType[]>([]);
+
+  useEffect(() => {
+    setData(() =>
+      allRecordsFrom30DaysAgo.filter(
+        (value) =>
+          value.category === titleSelected.category &&
+          value.title === titleSelected.title
+      )
+    );
+  }, [allRecordsFrom30DaysAgo]);
 
   return (
     <>
@@ -39,15 +52,13 @@ export function ViewRecordsByTitleDialog() {
           </div>
         </DialogTitle>
         <DialogContent className="flex flex-col gap-3">
-          <TableRecords
-            records={allRecordsFrom30DaysAgo.filter(
-              (value) =>
-                value.category === titleSelected.category &&
-                value.title === titleSelected.title
-            )}
-            isHideTitle
-            isHideCategory
+          <DetailsByTitleChart
+            records={data}
+            {...(titleSelected.category === "expenditure" && {
+              scheme: "secondary",
+            })}
           />
+          <TableRecords records={data} isHideTitle isHideCategory />
         </DialogContent>
       </DialogMui>
     </>
