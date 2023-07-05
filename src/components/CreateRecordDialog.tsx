@@ -1,5 +1,6 @@
 import { DialogContext } from "@/contexts/dialogsContext";
 import { RecordContext } from "@/contexts/recordContext";
+import { generateMaskCategory } from "@/utils/generateMaskCategory";
 import { optionsTitle } from "@/utils/optionTitle";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -214,17 +215,21 @@ export function CreateRecordDialog() {
               ),
             }}
           />
-          <TextField
-            margin="dense"
-            label="Compra foi dividida em quantas parcelas?"
-            type="number"
-            fullWidth
-            variant="outlined"
-            value={installments}
-            onChange={(e) =>
-              +e.target.value >= 0 && setInstallments(+e.target.value)
-            }
-          />
+          {category && (
+            <TextField
+              margin="dense"
+              label={`${generateMaskCategory(
+                category
+              )} foi dividida em quantas parcelas?`}
+              type="number"
+              fullWidth
+              variant="outlined"
+              value={installments}
+              onChange={(e) =>
+                +e.target.value >= 0 && setInstallments(+e.target.value)
+              }
+            />
+          )}
           <TextField
             margin="dense"
             label="Descrição (opcional)"

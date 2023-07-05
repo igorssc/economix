@@ -70,7 +70,6 @@ export function DetailsByTitleChart({
 
       const data = new Date(`${ano}-${mes}-${dia}:00:00`);
 
-      console.log(data);
       const weekday = data.getDay(); // Retorna um número de 0 a 6, onde 0 é domingo e 6 é sábado
 
       return weekday;

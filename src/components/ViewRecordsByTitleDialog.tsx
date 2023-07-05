@@ -29,6 +29,7 @@ export function ViewRecordsByTitleDialog() {
           value.title === titleSelected.title
       )
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allRecordsFrom30DaysAgo]);
 
   return (
@@ -51,14 +52,14 @@ export function ViewRecordsByTitleDialog() {
             />
           </div>
         </DialogTitle>
-        <DialogContent className="flex flex-col gap-3">
+        <DialogContent className="flex flex-col gap-3 overflow-y-visible">
           <DetailsByTitleChart
             records={data}
             {...(titleSelected.category === "expenditure" && {
               scheme: "secondary",
             })}
           />
-          <TableRecords records={data} isHideTitle isHideCategory />
+          <TableRecords recordsInit={data} hide={["title", "category"]} />
         </DialogContent>
       </DialogMui>
     </>

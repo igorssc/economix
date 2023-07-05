@@ -1,6 +1,5 @@
 "use client";
 import { CREATE_RECORD, createRecordMutationResponse } from "@/db/createRecord";
-import { DELETE_RECORD, deleteRecordMutationResponse } from "@/db/deleteRecord";
 import {
   GET_ALL_AGGREGATIONS_BETWEEN_DATES,
   getAllAggregationsBetweenDatesQueryResponse,
@@ -13,13 +12,19 @@ import {
   PUBLISH_RECORD,
   publishRecordMutationResponse,
 } from "@/db/publishRecord";
+import { REMOVE_RECORD, removeRecordMutationResponse } from "@/db/removeRecord";
 import { UPDATE_RECORD, updateRecordMutationResponse } from "@/db/updateRecord";
-import { getISODateOfMonthsAgo } from "@/utils/getISODateOfMonthsAgo";
+import { arrangeRecordsFromMonths } from "@/utils/arrangeRecordsFromMonths";
+import { countAllQuantitiesAndAmountRecordsOf30DaysAgoByTitle } from "@/utils/countAllQuantitiesAndAmountOf30DaysAgoByTitle";
+import { createRecord } from "@/utils/createRecord";
+import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
+import { getLastRecords } from "@/utils/getLastRecords";
+import { removeRecord } from "@/utils/removeRecord";
+import { updateRecord } from "@/utils/updateRecord";
 import { useMutation, useQuery } from "@apollo/client";
-import { differenceInMinutes, formatDistanceStrict } from "date-fns";
+import { differenceInMinutes } from "date-fns";
 import { useSession } from "next-auth/react";
 import { ReactNode, createContext, useEffect, useState } from "react";
-import { clearIntervalAsync, setIntervalAsync } from "set-interval-async";
 
 interface RecordProviderProps {
   children: ReactNode;
@@ -35,36 +40,59 @@ export type RecordType = {
   date: string;
 };
 
-type RecordData = {
-  countAllRecordsFromMonthsAgoByCategory: {
-    monthsAgo: number;
-    revenue: number;
-    expenditure: number;
-  }[];
+export type countAllQuantitiesAndAmountOf30DaysAgoByTitleType = {
+  title: string;
+  quantity: number;
+  category: string;
+  totalAmount: number;
+}[];
 
+export type allRecordsFromMonthsAgoByCategoryType = {
+  revenues: RecordType[];
+  expenditures: RecordType[];
+};
+
+export type allRecordsFromMonthsAgoByMonthType = {
+  monthAgo: number;
+  values: {
+    revenues: RecordType[];
+    expenditures: RecordType[];
+  };
+};
+
+type createType = {
+  title: string;
+  category: string;
+  amount: number;
+  description?: string;
+  installments: number;
+  date: string;
+};
+
+type updateType = {
+  id: string;
+  title?: string | undefined;
+  category?: string | undefined;
+  amount?: number | undefined;
+  description?: string | undefined;
+  date?: string | undefined;
+};
+
+type removeType = {
+  id: string;
+  date: string;
+};
+
+type RecordData = {
   allRecordsFrom30DaysAgo: RecordType[];
 
   allRecordsInFuture: RecordType[];
 
-  countAllQuantitiesAndAmountOf30DaysAgoByTitle: {
-    title: string;
-    quantity: number;
-    category: string;
-    totalAmount: number;
-  }[];
+  countAllQuantitiesAndAmountOf30DaysAgoByTitle: countAllQuantitiesAndAmountOf30DaysAgoByTitleType;
 
-  allRecordsFromMonthsAgoByMonth: {
-    monthAgo: number;
-    values: {
-      revenues: RecordType[];
-      expenditures: RecordType[];
-    };
-  }[];
+  allRecordsFromMonthsAgoByMonth: allRecordsFromMonthsAgoByMonthType[];
 
-  allRecordsFromMonthsAgoByCategory: {
-    revenues: RecordType[];
-    expenditures: RecordType[];
-  };
+  allRecordsFromMonthsAgoByCategory: allRecordsFromMonthsAgoByCategoryType;
 
   createRecord: ({
     title,
@@ -73,14 +101,7 @@ type RecordData = {
     description,
     installments,
     date,
-  }: {
-    title: string;
-    category: string;
-    amount: number;
-    description?: string;
-    installments: number;
-    date: string;
-  }) => Promise<void>;
+  }: createType) => Promise<void>;
 
   updateRecord: ({
     id,
@@ -89,16 +110,9 @@ type RecordData = {
     amount,
     description,
     date,
-  }: {
-    id: string;
-    title?: string | undefined;
-    category?: string | undefined;
-    amount?: number | undefined;
-    description?: string | undefined;
-    date?: string | undefined;
-  }) => Promise<void>;
+  }: updateType) => Promise<void>;
 
-  deleteRecord: ({ id, date }: { id: string; date: string }) => Promise<void>;
+  removeRecord: ({ id, date }: removeType) => Promise<void>;
 };
 
 export const RecordContext = createContext({} as RecordData);
@@ -115,8 +129,8 @@ export function RecordProvider({ children }: RecordProviderProps) {
   const [updateRegisterMutateFunction] =
     useMutation<updateRecordMutationResponse>(UPDATE_RECORD);
 
-  const [deleteRegisterMutateFunction] =
-    useMutation<deleteRecordMutationResponse>(DELETE_RECORD);
+  const [removeRegisterMutateFunction] =
+    useMutation<removeRecordMutationResponse>(REMOVE_RECORD);
 
   const { refetch: refetchGetAllRecordsFromMonthsAgo } =
     useQuery<getAllAggregationsBetweenDatesQueryResponse>(
@@ -131,51 +145,33 @@ export function RecordProvider({ children }: RecordProviderProps) {
   );
 
   const [
-    countAllRecordsFromMonthsAgoByCategory,
-    setCountAllRecordsFromMonthsAgoByCategory,
-  ] = useState(
-    Array.from({ length: 12 }, (_, i) => ({
-      monthsAgo: i,
-      revenue: 0,
-      expenditure: 0,
-    }))
-  );
-
-  const [
     countAllQuantitiesAndAmountOf30DaysAgoByTitle,
     setCountAllQuantitiesAndAmountOf30DaysAgoByTitle,
-  ] = useState(
-    [] as {
-      title: string;
-      quantity: number;
-      category: string;
-      totalAmount: number;
-    }[]
-  );
+  ] = useState<countAllQuantitiesAndAmountOf30DaysAgoByTitleType>([]);
 
   const [
     allRecordsFromMonthsAgoByCategory,
     setAllRecordsFromMonthsAgoByCategory,
-  ] = useState({
-    revenues: [] as RecordType[],
-    expenditures: [] as RecordType[],
+  ] = useState<allRecordsFromMonthsAgoByCategoryType>({
+    revenues: [],
+    expenditures: [],
   });
 
-  const [allRecordsFrom30DaysAgo, setAllRecordsFrom30DaysAgo] = useState(
-    [] as RecordType[]
-  );
+  const [allRecordsFrom30DaysAgo, setAllRecordsFrom30DaysAgo] = useState<
+    RecordType[]
+  >([] as RecordType[]);
 
-  const [allRecordsInFuture, setAllRecordsInFuture] = useState(
-    [] as RecordType[]
+  const [allRecordsInFuture, setAllRecordsInFuture] = useState<RecordType[]>(
+    []
   );
 
   const [allRecordsFromMonthsAgoByMonth, setAllRecordsFromMonthsAgoByMonth] =
-    useState(
+    useState<allRecordsFromMonthsAgoByMonthType[]>(
       Array.from({ length: 12 }, (_, i) => ({
         monthAgo: i,
         values: {
-          revenues: [] as RecordType[],
-          expenditures: [] as RecordType[],
+          revenues: [],
+          expenditures: [],
         },
       }))
     );
@@ -189,176 +185,80 @@ export function RecordProvider({ children }: RecordProviderProps) {
   }, [dataGetAllRecordsInFuture]);
 
   useEffect(() => {
-    setAllRecordsFrom30DaysAgo([]);
+    const recordsCurrentMonth = allRecordsFromMonthsAgoByMonth.find(
+      (v) => v.monthAgo === 0
+    )?.values;
 
-    allRecordsFromMonthsAgoByMonth
-      .find((v) => v.monthAgo === 0)
-      ?.values.expenditures.forEach((v) => {
-        setAllRecordsFrom30DaysAgo((prev) => [...prev, v]);
+    const recordsLastMonth = allRecordsFromMonthsAgoByMonth.find(
+      (v) => v.monthAgo === 1
+    )?.values;
+
+    const records = [] as RecordType[];
+
+    if (recordsCurrentMonth) {
+      records.push(
+        ...recordsCurrentMonth?.expenditures,
+        ...recordsCurrentMonth?.revenues
+      );
+    }
+
+    if (recordsLastMonth) {
+      records.push(
+        ...recordsLastMonth?.expenditures,
+        ...recordsLastMonth?.revenues
+      );
+    }
+
+    if (records.length > 0) {
+      const recordsFiltered = filterRecordsBasedOnPeriod({
+        records,
+        period: 30,
+        unit: "day",
       });
 
-    allRecordsFromMonthsAgoByMonth
-      .find((v) => v.monthAgo === 1)
-      ?.values.expenditures.forEach((v) => {
-        const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
-          unit: "day",
-          addSuffix: false,
-        }).split(" ")[0];
-
-        if (distance > 30) {
-          return;
-        }
-
-        setAllRecordsFrom30DaysAgo((prev) => [...prev, v]);
-      });
-
-    allRecordsFromMonthsAgoByMonth
-      .find((v) => v.monthAgo === 0)
-      ?.values.revenues.forEach((v) => {
-        setAllRecordsFrom30DaysAgo((prev) => [...prev, v]);
-      });
-
-    allRecordsFromMonthsAgoByMonth
-      .find((v) => v.monthAgo === 1)
-      ?.values.revenues.forEach((v) => {
-        const distance = +formatDistanceStrict(new Date(), new Date(v.date), {
-          unit: "day",
-          addSuffix: false,
-        }).split(" ")[0];
-
-        if (distance > 30) {
-          return;
-        }
-
-        setAllRecordsFrom30DaysAgo((prev) => [...prev, v]);
-      });
-
-    setAllRecordsFrom30DaysAgo((prev) =>
-      [...prev].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      )
-    );
+      setAllRecordsFrom30DaysAgo(recordsFiltered);
+    }
   }, [allRecordsFromMonthsAgoByMonth]);
 
   useEffect(() => {
-    setCountAllQuantitiesAndAmountOf30DaysAgoByTitle([]);
-
-    const prevArray = [] as {
-      title: string;
-      category: string;
-      quantity: number;
-      totalAmount: number;
-    }[];
-
-    allRecordsFrom30DaysAgo.forEach((v) => {
-      const valueIndex =
-        prevArray.length > 0
-          ? prevArray
-              .map((m) => m.title.toLowerCase())
-              .indexOf(v.title.toLowerCase())
-          : -1;
-
-      if (valueIndex > -1 && prevArray[valueIndex].category === v.category) {
-        prevArray[valueIndex] = {
-          title: v.title,
-          quantity: prevArray[valueIndex].quantity + 1,
-          totalAmount: prevArray[valueIndex].totalAmount + v.amount,
-          category: prevArray[valueIndex].category,
-        };
-      } else {
-        prevArray.push({
-          title: v.title,
-          quantity: 1,
-          totalAmount: v.amount,
-          category: v.category,
-        });
-      }
-    });
-
-    prevArray.sort((a, b) => b.totalAmount - a.totalAmount);
-
-    setCountAllQuantitiesAndAmountOf30DaysAgoByTitle(prevArray);
+    setCountAllQuantitiesAndAmountOf30DaysAgoByTitle(
+      countAllQuantitiesAndAmountRecordsOf30DaysAgoByTitle(
+        allRecordsFrom30DaysAgo
+      )
+    );
   }, [allRecordsFrom30DaysAgo]);
 
-  const searchLastData = () => {
+  useEffect(() => {
     if (session?.user?.email) {
-      setCountAllRecordsFromMonthsAgoByCategory(
-        Array.from({ length: 12 }, (_, i) => ({
-          monthsAgo: i,
-          revenue: 0,
-          expenditure: 0,
-        }))
-      );
+      const dataCached = localStorage.getItem(`[data-${session?.user?.email}]`);
 
-      const isFirstRender =
-        allRecordsFromMonthsAgoByCategory.revenues.length === 0 &&
-        allRecordsFromMonthsAgoByCategory.expenditures.length === 0;
+      if (dataCached) {
+        setAllRecordsFromMonthsAgoByCategory(JSON.parse(dataCached));
+      }
 
-      const prevArray = {
-        revenues: [] as RecordType[],
-        expenditures: [] as RecordType[],
+      const fetchData = async () => {
+        const result = await getLastRecords({
+          session,
+          refetchGetAllRecordsFromMonthsAgo,
+        });
+
+        localStorage.setItem(
+          `[data-${session?.user?.email}]`,
+          JSON.stringify(result)
+        );
+
+        setAllRecordsFromMonthsAgoByCategory(result);
       };
 
-      Array.from({ length: 12 }, (_, i) => {
-        setTimeout(() => {
-          let skip = 0;
-
-          const interval = setIntervalAsync(async () => {
-            const result = await refetchGetAllRecordsFromMonthsAgo({
-              email: session?.user?.email,
-              dateGTE: getISODateOfMonthsAgo(i),
-              dateLTE: getISODateOfMonthsAgo(i, true),
-              skip: skip,
-            });
-
-            result.data.recordsConnection.edges.forEach((v) => {
-              if (v.node.category === "expenditure") {
-                if (isFirstRender) {
-                  setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                    revenues: [...prev.revenues],
-                    expenditures: [...prev.expenditures, v.node as RecordType],
-                  }));
-                } else {
-                  prevArray.expenditures.push(v.node as RecordType);
-                }
-              }
-              if (v.node.category === "revenue") {
-                if (isFirstRender) {
-                  setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                    expenditures: [...prev.expenditures],
-                    revenues: [...prev.revenues, v.node as RecordType],
-                  }));
-                } else {
-                  prevArray.revenues.push(v.node as RecordType);
-                }
-              }
-            });
-
-            if (i === 11 && !isFirstRender) {
-              setAllRecordsFromMonthsAgoByCategory(prevArray);
-            }
-
-            skip += 10;
-
-            if (!result?.data?.recordsConnection?.pageInfo?.hasNextPage) {
-              clearIntervalAsync(interval);
-            }
-          }, 500);
-        }, 1000 + i * 1000);
-      });
+      fetchData();
     }
-  };
 
-  useEffect(() => {
-    searchLastData();
-  }, [session?.user?.email]);
-
-  useEffect(() => {
     refetchGetAllRecordsInFuture({
       email: session?.user?.email,
       dateGTE: new Date().toISOString(),
       skip: 0,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.email]);
 
   useEffect(() => {
@@ -373,230 +273,90 @@ export function RecordProvider({ children }: RecordProviderProps) {
     );
 
     if (allRecordsFromMonthsAgoByCategory.revenues.length > 0) {
-      allRecordsFromMonthsAgoByCategory.revenues.forEach((v, i) => {
-        const distanceInMonths = +formatDistanceStrict(
-          new Date(),
-          new Date(v.date),
-          {
-            unit: "month",
-            addSuffix: false,
-          }
-        ).split(" ")[0];
+      const records = arrangeRecordsFromMonths(
+        allRecordsFromMonthsAgoByCategory.revenues
+      );
 
-        setAllRecordsFromMonthsAgoByMonth((prev) => {
-          const newArray = [...prev];
-
-          if (distanceInMonths > 0) {
-            newArray[distanceInMonths] = {
-              ...newArray[distanceInMonths],
-              values: {
-                revenues: [...newArray[distanceInMonths].values.revenues, v],
-                expenditures: [
-                  ...newArray[distanceInMonths].values.expenditures,
-                ],
-              },
-            };
-
-            return newArray;
-          }
-          if (differenceInMinutes(new Date(), new Date(v.date)) >= 0) {
-            newArray[distanceInMonths] = {
-              ...newArray[distanceInMonths],
-              values: {
-                revenues: [...newArray[distanceInMonths].values.revenues, v],
-                expenditures: [
-                  ...newArray[distanceInMonths].values.expenditures,
-                ],
-              },
-            };
-          }
-          return newArray;
-        });
-      });
+      setAllRecordsFromMonthsAgoByMonth((prev) =>
+        prev.map((_, i) => ({
+          monthAgo: i,
+          values: {
+            revenues: records[i],
+            expenditures: prev[i].values.expenditures,
+          },
+        }))
+      );
     }
+
     if (allRecordsFromMonthsAgoByCategory.expenditures.length > 0) {
-      allRecordsFromMonthsAgoByCategory.expenditures.forEach((v, i) => {
-        const distanceInMonths = +formatDistanceStrict(
-          new Date(),
-          new Date(v.date),
-          {
-            unit: "month",
-            addSuffix: false,
-          }
-        ).split(" ")[0];
+      const records = arrangeRecordsFromMonths(
+        allRecordsFromMonthsAgoByCategory.expenditures
+      );
 
-        setAllRecordsFromMonthsAgoByMonth((prev) => {
-          const newArray = [...prev];
-
-          if (distanceInMonths > 0) {
-            newArray[distanceInMonths] = {
-              ...newArray[distanceInMonths],
-              values: {
-                revenues: [...newArray[distanceInMonths].values.revenues],
-                expenditures: [
-                  ...newArray[distanceInMonths].values.expenditures,
-                  v,
-                ],
-              },
-            };
-            return newArray;
-          }
-
-          if (differenceInMinutes(new Date(), new Date(v.date)) >= 0) {
-            newArray[distanceInMonths] = {
-              ...newArray[distanceInMonths],
-              values: {
-                revenues: [...newArray[distanceInMonths].values.revenues],
-                expenditures: [
-                  ...newArray[distanceInMonths].values.expenditures,
-                  v,
-                ],
-              },
-            };
-          }
-          return newArray;
-        });
-      });
+      setAllRecordsFromMonthsAgoByMonth((prev) =>
+        prev.map((v, i) => ({
+          monthAgo: i,
+          values: {
+            revenues: prev[i].values.revenues,
+            expenditures: records[i],
+          },
+        }))
+      );
     }
   }, [allRecordsFromMonthsAgoByCategory]);
 
-  const createRecord = async ({
+  async function create({
     title,
     category,
     amount,
-    description,
     installments,
+    description,
     date,
-  }: {
-    title: string;
-    category: string;
-    amount: number;
-    description?: string;
-    installments: number;
-    date: string;
-  }) => {
+  }: createType) {
     Array.from({ length: installments }).map((_, i) => {
       setTimeout(async () => {
-        await createRecordMutateFunction({
-          variables: {
-            email: session?.user?.email,
+        const recordCreated = await createRecord({
+          data: {
+            email: session?.user?.email || "",
             title,
             category,
-            installment: installments > 1 ? i + 1 : 0,
             amount: +(amount / installments).toFixed(2),
+            installments: installments > 1 ? i + 1 : 0,
             description,
             date: new Date(
               new Date(date).setMonth(new Date(date).getMonth() + i)
             ).toISOString(),
           },
-        }).then(async (response) => {
-          await publishRegisterMutateFunction({
-            variables: {
-              id: response.data?.createRecord.id,
-            },
-          }).then(() => {
-            if (
-              differenceInMinutes(
-                new Date(),
-                new Date(new Date(date).setMonth(new Date(date).getMonth() + i))
-              ) >= 0
-            ) {
-              if (category === "revenue") {
-                setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                  expenditures: [...prev.expenditures],
-                  revenues: [
-                    ...prev.revenues,
-                    response.data?.createRecord as RecordType,
-                  ],
-                }));
-              }
-
-              if (category === "expenditure") {
-                setAllRecordsFromMonthsAgoByCategory((prev) => ({
-                  expenditures: [
-                    ...prev.expenditures,
-                    response.data?.createRecord as RecordType,
-                  ],
-                  revenues: [...prev.revenues],
-                }));
-              }
-            } else {
-              setAllRecordsInFuture((prev) =>
-                [...prev, response.data?.createRecord as RecordType]
-                  .sort(
-                    (a, b) =>
-                      new Date(a.date).getTime() - new Date(b.date).getTime()
-                  )
-                  .slice(0, 10)
-              );
-            }
-          });
+          createRecordMutateFunction,
+          publishRegisterMutateFunction,
         });
-      }, 1000 * (i + 1));
-    });
-  };
-
-  const updateRecord = async ({
-    id,
-    title,
-    category,
-    amount,
-    description,
-    date,
-  }: {
-    id: string;
-    title?: string;
-    category?: string;
-    amount?: number;
-    description?: string;
-    date?: string;
-  }) => {
-    await updateRegisterMutateFunction({
-      variables: {
-        id,
-        data: { title, category, amount, description, date },
-      },
-    }).then(async (response) => {
-      await publishRegisterMutateFunction({
-        variables: {
-          id: response.data?.updateRecord.id,
-        },
-      }).then(() => {
-        setAllRecordsFromMonthsAgoByCategory((prev) => ({
-          expenditures: [...prev.expenditures].filter((v) => v.id !== id),
-          revenues: [...prev.revenues].filter((v) => v.id !== id),
-        }));
-
-        setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== id));
 
         if (
           differenceInMinutes(
             new Date(),
-            new Date(response.data?.updateRecord.date || "")
+            new Date(
+              new Date(recordCreated.date).setMonth(
+                new Date(recordCreated.date).getMonth() + i
+              )
+            )
           ) >= 0
         ) {
-          if (response.data?.updateRecord.category === "revenue") {
+          if (recordCreated.category === "revenue") {
             setAllRecordsFromMonthsAgoByCategory((prev) => ({
               expenditures: [...prev.expenditures],
-              revenues: [
-                ...prev.revenues,
-                response.data?.updateRecord as RecordType,
-              ],
+              revenues: [...prev.revenues, recordCreated],
             }));
           }
 
-          if (response.data?.updateRecord.category === "expenditure") {
+          if (recordCreated.category === "expenditure") {
             setAllRecordsFromMonthsAgoByCategory((prev) => ({
-              expenditures: [
-                ...prev.expenditures,
-                response.data?.updateRecord as RecordType,
-              ],
+              expenditures: [...prev.expenditures, recordCreated],
               revenues: [...prev.revenues],
             }));
           }
         } else {
           setAllRecordsInFuture((prev) =>
-            [...prev, response.data?.updateRecord as RecordType]
+            [...prev, recordCreated]
               .sort(
                 (a, b) =>
                   new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -604,44 +364,88 @@ export function RecordProvider({ children }: RecordProviderProps) {
               .slice(0, 10)
           );
         }
-      });
+      }, 1000 * (i + 1));
     });
-  };
+  }
 
-  const deleteRecord = async ({ id, date }: { id: string; date: string }) => {
-    await deleteRegisterMutateFunction({
-      variables: {
-        id,
-      },
-    }).then(() => {
-      if (differenceInMinutes(new Date(), new Date(date)) >= 0) {
-        setAllRecordsFromMonthsAgoByCategory((prev) => ({
-          expenditures: [...prev.expenditures].filter((v) => v.id !== id),
-          revenues: [...prev.revenues].filter((v) => v.id !== id),
-        }));
-      } else {
-        setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== id));
-        refetchGetAllRecordsInFuture({
-          email: session?.user?.email,
-          dateGTE: new Date().toISOString(),
-          skip: 0,
-        });
-      }
+  async function update(data: updateType) {
+    const registerUpdated = await updateRecord({
+      data,
+      updateRegisterMutateFunction,
+      publishRegisterMutateFunction,
     });
-  };
+
+    setAllRecordsFromMonthsAgoByCategory((prev) => ({
+      expenditures: [...prev.expenditures].filter((v) => v.id !== data.id),
+      revenues: [...prev.revenues].filter((v) => v.id !== data.id),
+    }));
+
+    setAllRecordsInFuture((prev) => [...prev].filter((v) => v.id !== data.id));
+
+    if (
+      differenceInMinutes(new Date(), new Date(registerUpdated.date || "")) >= 0
+    ) {
+      if (registerUpdated.category === "revenue") {
+        setAllRecordsFromMonthsAgoByCategory((prev) => ({
+          expenditures: [...prev.expenditures],
+          revenues: [...prev.revenues, registerUpdated as RecordType],
+        }));
+      }
+
+      if (registerUpdated.category === "expenditure") {
+        setAllRecordsFromMonthsAgoByCategory((prev) => ({
+          expenditures: [...prev.expenditures, registerUpdated as RecordType],
+          revenues: [...prev.revenues],
+        }));
+      }
+    } else {
+      setAllRecordsInFuture((prev) =>
+        [...prev, registerUpdated as RecordType]
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          )
+          .slice(0, 10)
+      );
+    }
+  }
+
+  async function remove({ id, date }: removeType) {
+    const registerRemoved = await removeRecord({
+      date,
+      removeRegisterMutateFunction,
+      id,
+    });
+
+    if (differenceInMinutes(new Date(), new Date(registerRemoved.date)) >= 0) {
+      setAllRecordsFromMonthsAgoByCategory((prev) => ({
+        expenditures: [...prev.expenditures].filter(
+          (v) => v.id !== registerRemoved.id
+        ),
+        revenues: [...prev.revenues].filter((v) => v.id !== registerRemoved.id),
+      }));
+    } else {
+      setAllRecordsInFuture((prev) =>
+        [...prev].filter((v) => v.id !== registerRemoved.id)
+      );
+      refetchGetAllRecordsInFuture({
+        email: session?.user?.email,
+        dateGTE: new Date().toISOString(),
+        skip: 0,
+      });
+    }
+  }
 
   return (
     <RecordContext.Provider
       value={{
-        countAllRecordsFromMonthsAgoByCategory,
         countAllQuantitiesAndAmountOf30DaysAgoByTitle,
         allRecordsFromMonthsAgoByMonth,
         allRecordsFromMonthsAgoByCategory,
         allRecordsFrom30DaysAgo,
         allRecordsInFuture,
-        createRecord,
-        updateRecord,
-        deleteRecord,
+        createRecord: create,
+        updateRecord: update,
+        removeRecord: remove,
       }}
     >
       {children}

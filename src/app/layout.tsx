@@ -5,6 +5,7 @@ import { RecordProvider } from "@/contexts/recordContext";
 import { ThemeProvider } from "@/contexts/themeContext";
 import { Apollo } from "@/lib/apollo";
 import { Inter } from "next/font/google";
+import { cookies } from "next/headers";
 import "../style/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,6 +21,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = cookies();
+
+  const cachedSession = cookieStore.get("user-session");
+
   return (
     <html lang="pt-br">
       <head>

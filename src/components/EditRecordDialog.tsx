@@ -83,6 +83,7 @@ export function EditRecordDialog() {
     );
     setDescription(recordSelected.description || "");
     setDate(getDateTimeString(new Date(recordSelected.date)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async () => {
