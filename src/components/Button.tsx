@@ -22,8 +22,9 @@ export const Button = ({
         className={twMerge(
           "w-full py-4 cursor-pointer text-lg flex items-center justify-center flex-nowrap m-auto border-none md:max-w-md",
           scheme === "primary" && "text-white bg-purple-700 dark:bg-purple-950",
-          scheme === "secondary" && "bg-transparent text-purple-700 dark:text-white",
-          scheme === "tertiary" && "",
+          scheme === "secondary" && "text-white bg-gray-800",
+          scheme === "tertiary" &&
+            "bg-transparent text-purple-700 dark:text-white",
           isDisabled && "brightness-50 hover:brightness-50",
           !isDisabled && "hover:brightness-90",
           !isSmall && "md:py-6",
