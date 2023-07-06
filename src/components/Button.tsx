@@ -1,5 +1,5 @@
-import { twMerge } from "tailwind-merge";
 import { ButtonHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   scheme?: "primary" | "secondary" | "tertiary";
@@ -21,7 +21,7 @@ export const Button = ({
         {...props}
         className={twMerge(
           "w-full py-4 cursor-pointer text-lg flex items-center justify-center flex-nowrap m-auto border-none md:max-w-md",
-          scheme === "primary" && "text-gray-50 bg-purple-700",
+          scheme === "primary" && "text-white bg-purple-700 dark:bg-purple-950",
           scheme === "secondary" && "text-white bg-gray-800",
           scheme === "tertiary" && "",
           isDisabled && "brightness-50 hover:brightness-50",

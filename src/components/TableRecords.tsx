@@ -8,12 +8,14 @@ interface TableRecordsProps {
   period?: "past" | "future";
   hide?: string[];
   recordsInit?: RecordType[] | null;
+  limit?: number;
 }
 
 export function TableRecords({
   period = "past",
   hide = [],
   recordsInit = null,
+  limit,
 }: TableRecordsProps) {
   const { allRecordsFrom30DaysAgo, allRecordsInFuture } =
     useContext(RecordContext);
@@ -59,7 +61,7 @@ export function TableRecords({
 
   return (
     <TableBase
-      limit={15}
+      {...(limit && { limit })}
       data={recordsDisplayed.map((record) => ({
         data: {
           title: {

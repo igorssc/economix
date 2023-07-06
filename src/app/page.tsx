@@ -193,7 +193,7 @@ export default function Dashboard() {
             <Box className="sm:col-span-6 md:col-span-3 md:row-span-6 max-md:order-2">
               <h1 className="text-center mb-4">Útimos registros</h1>
               <div className="relative overflow-x-auto">
-                <TableRecords hide={["description"]} />
+                <TableRecords hide={["description"]} limit={15} />
               </div>
             </Box>
 
@@ -216,7 +216,11 @@ export default function Dashboard() {
             <Box className="sm:col-span-6 md:col-span-3 max-md:order-4">
               <h1 className="text-center mb-4">Registros futuros</h1>
               <div className="relative overflow-x-auto">
-                <TableRecords period="future" hide={["description"]} />
+                <TableRecords
+                  period="future"
+                  hide={["description"]}
+                  limit={15}
+                />
               </div>
             </Box>
           </div>
