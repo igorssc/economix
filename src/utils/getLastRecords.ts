@@ -1,20 +1,30 @@
-import { RecordType } from "@/contexts/recordContext";
+import {
+  RecordType,
+  allRecordsFromMonthsAgoByCategoryType,
+} from "@/contexts/recordContext";
 import { getAllAggregationsBetweenDatesQueryResponse } from "@/db/getAllAggregationsBetweenDates";
 import { ApolloQueryResult, OperationVariables } from "@apollo/client";
 import { Session } from "next-auth";
+import { Dispatch, SetStateAction } from "react";
 import { getISODateOfMonthsAgo } from "./getISODateOfMonthsAgo";
 
 interface getLastRecordsProps {
   session: Session | null;
 
+  isRealTime: boolean;
+
   refetchGetAllRecordsFromMonthsAgo: (
     variables?: Partial<OperationVariables> | undefined
   ) => Promise<ApolloQueryResult<getAllAggregationsBetweenDatesQueryResponse>>;
+
+  setRecords: Dispatch<SetStateAction<allRecordsFromMonthsAgoByCategoryType>>;
 }
 
 export const getLastRecords = async ({
   session,
   refetchGetAllRecordsFromMonthsAgo,
+  isRealTime,
+  setRecords,
 }: getLastRecordsProps): Promise<{
   revenues: RecordType[];
   expenditures: RecordType[];
@@ -42,12 +52,25 @@ export const getLastRecords = async ({
               recordsFromMonthsAgoByCategory.expenditures.push(
                 v.node as RecordType
               );
+
+              if (isRealTime) {
+                setRecords((prev) => ({
+                  revenues: [...prev.revenues],
+                  expenditures: [...prev.expenditures, v.node as RecordType],
+                }));
+              }
             }
 
             if (v.node.category === "revenue") {
               recordsFromMonthsAgoByCategory.revenues.push(
                 v.node as RecordType
               );
+
+              isRealTime &&
+                setRecords((prev) => ({
+                  expenditures: [...prev.expenditures],
+                  revenues: [...prev.revenues, v.node as RecordType],
+                }));
             }
           });
 

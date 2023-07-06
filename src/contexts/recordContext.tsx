@@ -232,16 +232,12 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
   useEffect(() => {
     if (session?.user?.email) {
-      const dataCached = localStorage.getItem(`[data-${session?.user?.email}]`);
-
-      if (dataCached) {
-        setAllRecordsFromMonthsAgoByCategory(JSON.parse(dataCached));
-      }
-
-      const fetchData = async () => {
+      const fetchData = async (isRealTime = false) => {
         const result = await getLastRecords({
           session,
           refetchGetAllRecordsFromMonthsAgo,
+          isRealTime,
+          setRecords: setAllRecordsFromMonthsAgoByCategory,
         });
 
         localStorage.setItem(
@@ -252,7 +248,14 @@ export function RecordProvider({ children }: RecordProviderProps) {
         setAllRecordsFromMonthsAgoByCategory(result);
       };
 
-      fetchData();
+      const dataCached = localStorage.getItem(`[data-${session?.user?.email}]`);
+
+      if (dataCached) {
+        setAllRecordsFromMonthsAgoByCategory(JSON.parse(dataCached));
+        fetchData();
+      } else {
+        fetchData(true);
+      }
     }
 
     refetchGetAllRecordsInFuture({
