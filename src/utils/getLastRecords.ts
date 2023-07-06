@@ -4,6 +4,7 @@ import {
 } from "@/contexts/recordContext";
 import { getAllAggregationsBetweenDatesQueryResponse } from "@/db/getAllAggregationsBetweenDates";
 import { ApolloQueryResult, OperationVariables } from "@apollo/client";
+import { isEqual } from "lodash";
 import { Session } from "next-auth";
 import { Dispatch, SetStateAction } from "react";
 import { getISODateOfMonthsAgo } from "./getISODateOfMonthsAgo";
@@ -49,6 +50,8 @@ export const getLastRecords = async ({
           });
 
           result.data.recordsConnection.edges.forEach((v) => {
+            console.log(recordsFromMonthsAgoByCategory);
+
             if (v.node.category === "expenditure") {
               recordsFromMonthsAgoByCategory.expenditures.push(
                 v.node as RecordType
@@ -123,48 +126,56 @@ export const getLastRecords = async ({
                     },
                   });
                 } else {
-                  setRecords((prev) => ({
-                    revenues:
-                      v.node.category === "revenue"
-                        ? [
-                            ...prev.revenues.filter((p) => p.id !== v.node.id),
-                            v.node,
-                          ]
-                        : [...prev.revenues],
-                    expenditures:
-                      v.node.category === "expenditure"
-                        ? [
-                            ...prev.expenditures.filter(
-                              (p) => p.id !== v.node.id
-                            ),
-                            v.node,
-                          ]
-                        : [...prev.expenditures],
-                  }));
+                  const findCacheData = dataCached[
+                    (v.node.category + "s") as "revenues" | "expenditures"
+                  ].find((f) => f.id === v.node.id);
 
-                  updateSessionCache({
-                    session: session as Session,
-                    data: {
+                  if (!isEqual(v.node, findCacheData)) {
+                    setRecords((prev) => ({
                       revenues:
                         v.node.category === "revenue"
                           ? [
-                              ...dataCached.revenues.filter(
+                              ...prev.revenues.filter(
                                 (p) => p.id !== v.node.id
                               ),
                               v.node,
                             ]
-                          : [...dataCached.revenues],
+                          : [...prev.revenues],
                       expenditures:
                         v.node.category === "expenditure"
                           ? [
-                              ...dataCached.expenditures.filter(
+                              ...prev.expenditures.filter(
                                 (p) => p.id !== v.node.id
                               ),
                               v.node,
                             ]
-                          : [...dataCached.expenditures],
-                    },
-                  });
+                          : [...prev.expenditures],
+                    }));
+
+                    updateSessionCache({
+                      session: session as Session,
+                      data: {
+                        revenues:
+                          v.node.category === "revenue"
+                            ? [
+                                ...dataCached.revenues.filter(
+                                  (p) => p.id !== v.node.id
+                                ),
+                                v.node,
+                              ]
+                            : [...dataCached.revenues],
+                        expenditures:
+                          v.node.category === "expenditure"
+                            ? [
+                                ...dataCached.expenditures.filter(
+                                  (p) => p.id !== v.node.id
+                                ),
+                                v.node,
+                              ]
+                            : [...dataCached.expenditures],
+                      },
+                    });
+                  }
                 }
               }
             }
