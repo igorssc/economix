@@ -154,7 +154,8 @@ export function TableBase({
         isSmall
         className={twMerge(
           "gap-2 mt-3 py-2 w-48 max-w-full text-xs font-bold uppercase leading-relaxed [&_.icon]:text-sm [&_.icon]:text-white",
-          currentLimit && currentLimit >= dataDisplayed.length && "hidden"
+          currentLimit && currentLimit >= dataDisplayed.length && "hidden",
+          !currentLimit && "hidden"
         )}
         onClick={() => setCurrentLimit((prev) => (prev || 0) + (limit || 0))}
       >
