@@ -1,7 +1,7 @@
 "use client";
 import { RecordContext } from "@/contexts/recordContext";
 import { ArrowDown, ArrowUp, Eye, EyeSlash } from "@phosphor-icons/react";
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 import { useContext, useEffect, useState } from "react";
 import { BaseSummarizedMonthlyExpensesIndex } from "./BaseSummarizedMonthlyExpensesIndex";
 
@@ -40,7 +40,7 @@ export function SummarizedMonthlyExpensesIndex() {
           <br />
           <div className="flex gap-3">
             <span
-              className={clsx(
+              className={twMerge(
                 "font-bold text-2xl",
                 isHideValues && "blur-md text-purple-700"
               )}

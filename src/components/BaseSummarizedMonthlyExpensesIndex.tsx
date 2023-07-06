@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@phosphor-icons/react";
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 
 interface BaseSummarizedMonthlyExpensesIndexProps {
   invert?: boolean;
@@ -23,14 +23,14 @@ export function BaseSummarizedMonthlyExpensesIndex({
         <_icon
           color="#d1d5db"
           weight="bold"
-          className={clsx(
+          className={twMerge(
             "bg-purple-700 dark:bg-purple-900 p-2 md:p-4 rounded-full w-8 h-8 md:w-14 md:h-14",
             invert && "md:order-2"
           )}
         />
-        <p className={clsx("text-sm", invert && "md:text-right md:order-1")}>
+        <p className={twMerge("text-sm", invert && "md:text-right md:order-1")}>
           <span
-            className={clsx(
+            className={twMerge(
               "md:text-lg max-md:font-bold",
               isHideValues && "blur-md text-purple-700"
             )}

@@ -7,6 +7,7 @@ import { ApolloQueryResult, OperationVariables } from "@apollo/client";
 import { Session } from "next-auth";
 import { Dispatch, SetStateAction } from "react";
 import { getISODateOfMonthsAgo } from "./getISODateOfMonthsAgo";
+import { getSessionCache, updateSessionCache } from "./sessionCache";
 
 interface getLastRecordsProps {
   session: Session | null;
@@ -29,7 +30,7 @@ export const getLastRecords = async ({
   revenues: RecordType[];
   expenditures: RecordType[];
 }> => {
-  const recordsFromMonthsAgoByCategory = {
+  let recordsFromMonthsAgoByCategory = {
     revenues: [] as RecordType[],
     expenditures: [] as RecordType[],
   };
@@ -52,25 +53,120 @@ export const getLastRecords = async ({
               recordsFromMonthsAgoByCategory.expenditures.push(
                 v.node as RecordType
               );
-
-              if (isRealTime) {
-                setRecords((prev) => ({
-                  revenues: [...prev.revenues],
-                  expenditures: [...prev.expenditures, v.node as RecordType],
-                }));
-              }
             }
 
             if (v.node.category === "revenue") {
               recordsFromMonthsAgoByCategory.revenues.push(
                 v.node as RecordType
               );
+            }
 
-              isRealTime &&
-                setRecords((prev) => ({
-                  expenditures: [...prev.expenditures],
-                  revenues: [...prev.revenues, v.node as RecordType],
-                }));
+            if (isRealTime) {
+              setRecords((prev) => ({
+                revenues:
+                  v.node.category === "revenue"
+                    ? [...prev.revenues, v.node]
+                    : [...prev.revenues],
+                expenditures:
+                  v.node.category === "expenditure"
+                    ? [...prev.expenditures, v.node]
+                    : [...prev.expenditures],
+              }));
+
+              updateSessionCache({
+                session: session as Session,
+                data: {
+                  revenues:
+                    v.node.category === "revenue"
+                      ? [...recordsFromMonthsAgoByCategory.revenues, v.node]
+                      : [...recordsFromMonthsAgoByCategory.revenues],
+                  expenditures:
+                    v.node.category === "expenditure"
+                      ? [...recordsFromMonthsAgoByCategory.expenditures, v.node]
+                      : [...recordsFromMonthsAgoByCategory.expenditures],
+                },
+              });
+            } else {
+              const dataCached = getSessionCache(session as Session);
+
+              if (dataCached) {
+                if (
+                  !(
+                    dataCached.expenditures.some(
+                      (data) => data.id === v.node.id
+                    ) ||
+                    dataCached.revenues.some((data) => data.id === v.node.id)
+                  )
+                ) {
+                  setRecords((prev) => ({
+                    revenues:
+                      v.node.category === "revenue"
+                        ? [...prev.revenues, v.node]
+                        : [...prev.revenues],
+                    expenditures:
+                      v.node.category === "expenditure"
+                        ? [...prev.expenditures, v.node]
+                        : [...prev.expenditures],
+                  }));
+
+                  updateSessionCache({
+                    session: session as Session,
+                    data: {
+                      revenues:
+                        v.node.category === "revenue"
+                          ? [...dataCached.revenues, v.node]
+                          : [...dataCached.revenues],
+                      expenditures:
+                        v.node.category === "expenditure"
+                          ? [...dataCached.expenditures, v.node]
+                          : [...dataCached.expenditures],
+                    },
+                  });
+                } else {
+                  setRecords((prev) => ({
+                    revenues:
+                      v.node.category === "revenue"
+                        ? [
+                            ...prev.revenues.filter((p) => p.id !== v.node.id),
+                            v.node,
+                          ]
+                        : [...prev.revenues],
+                    expenditures:
+                      v.node.category === "expenditure"
+                        ? [
+                            ...prev.expenditures.filter(
+                              (p) => p.id !== v.node.id
+                            ),
+                            v.node,
+                          ]
+                        : [...prev.expenditures],
+                  }));
+
+                  updateSessionCache({
+                    session: session as Session,
+                    data: {
+                      revenues:
+                        v.node.category === "revenue"
+                          ? [
+                              ...dataCached.revenues.filter(
+                                (p) => p.id !== v.node.id
+                              ),
+                              v.node,
+                            ]
+                          : [...dataCached.revenues],
+                      expenditures:
+                        v.node.category === "expenditure"
+                          ? [
+                              ...dataCached.expenditures.filter(
+                                (p) => p.id !== v.node.id
+                              ),
+                              v.node,
+                            ]
+                          : [...dataCached.expenditures],
+                    },
+                  });
+                }
+              }
             }
           });
 

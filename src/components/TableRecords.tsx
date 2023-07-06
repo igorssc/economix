@@ -7,13 +7,13 @@ import { TableBase } from "./TableBase";
 interface TableRecordsProps {
   period?: "past" | "future";
   hide?: string[];
-  recordsInit?: RecordType[];
+  recordsInit?: RecordType[] | null;
 }
 
 export function TableRecords({
   period = "past",
   hide = [],
-  recordsInit = [],
+  recordsInit = null,
 }: TableRecordsProps) {
   const { allRecordsFrom30DaysAgo, allRecordsInFuture } =
     useContext(RecordContext);
@@ -24,38 +24,42 @@ export function TableRecords({
     setIsOpenViewRecordsByTitleDialog,
   } = useContext(DialogContext);
 
-  const [recordsDisplayed, setRecordsDisplayed] =
-    useState<RecordType[]>(recordsInit);
+  const [recordsDisplayed, setRecordsDisplayed] = useState<RecordType[]>([]);
 
   useEffect(() => {
-    if (period === "future") {
-      setRecordsDisplayed(allRecordsInFuture);
+    if (recordsInit) {
+      setRecordsDisplayed(recordsInit);
     } else {
-      setRecordsDisplayed(allRecordsFrom30DaysAgo);
+      if (period === "future") {
+        setRecordsDisplayed(allRecordsInFuture);
+      } else {
+        setRecordsDisplayed(allRecordsFrom30DaysAgo);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (period === "past" && recordsInit.length === 0) {
+    if (period === "past" && !recordsInit) {
       setRecordsDisplayed(allRecordsFrom30DaysAgo);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allRecordsFrom30DaysAgo]);
 
   useEffect(() => {
-    if (period === "future" && recordsInit.length === 0) {
+    if (period === "future" && !recordsInit) {
       setRecordsDisplayed(allRecordsInFuture);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allRecordsInFuture]);
 
   useEffect(() => {
-    recordsInit.length > 0 && setRecordsDisplayed(recordsInit);
+    recordsInit && setRecordsDisplayed(recordsInit);
   }, [recordsInit]);
 
   return (
     <TableBase
+      limit={15}
       data={recordsDisplayed.map((record) => ({
         data: {
           title: {

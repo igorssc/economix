@@ -13,6 +13,7 @@ export function TableRanking() {
 
   return (
     <TableBase
+      limit={5}
       data={countAllQuantitiesAndAmountOf30DaysAgoByTitle.map((data) => ({
         data: {
           title: {

@@ -10,8 +10,6 @@ import { DetailsByTitleChart } from "./DetailsByTitleChart";
 import { TableRecords } from "./TableRecords";
 
 export function ViewRecordsByTitleDialog() {
-  const handleClose = () => setOpen(false);
-
   const {
     isOpenViewRecordsByTitleDialog: open,
     setIsOpenViewRecordsByTitleDialog: setOpen,
@@ -31,7 +29,13 @@ export function ViewRecordsByTitleDialog() {
       )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRecordsFrom30DaysAgo]);
+  }, [allRecordsFrom30DaysAgo, titleSelected]);
+
+  const handleClose = () => {
+    setData([]);
+
+    setOpen(false);
+  };
 
   return (
     <>

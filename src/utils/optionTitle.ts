@@ -31,6 +31,8 @@ export const optionsTitle = {
     "Ferramenta",
     "Loteria",
     "Farmácia",
+    "Transporte",
+    "Recarga",
   ]
     .filter(function (elem, pos, self) {
       return self.indexOf(elem) == pos;

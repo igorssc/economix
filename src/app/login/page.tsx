@@ -12,7 +12,7 @@ export default function Login() {
   const router = useRouter();
 
   if (session?.user) {
-    router.push("/dashboard");
+    router.push("../");
     return null;
   }
 

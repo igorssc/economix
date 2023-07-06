@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 import { ButtonHTMLAttributes } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,8 +19,8 @@ export const Button = ({
     <>
       <button
         {...props}
-        className={clsx(
-          "w-full py-4 rounded cursor-pointer text-lg flex items-center justify-center flex-nowrap m-auto border-none md:max-w-md",
+        className={twMerge(
+          "w-full py-4 cursor-pointer text-lg flex items-center justify-center flex-nowrap m-auto border-none md:max-w-md",
           scheme === "primary" && "text-gray-50 bg-purple-700",
           scheme === "secondary" && "text-white bg-gray-800",
           scheme === "tertiary" && "",

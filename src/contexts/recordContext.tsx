@@ -20,8 +20,8 @@ import { createRecord } from "@/utils/createRecord";
 import { deleteRecord } from "@/utils/deleteRecord";
 import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
 import { getLastRecords } from "@/utils/getLastRecords";
+import { getSessionCache, updateSessionCache } from "@/utils/sessionCache";
 import { updateRecord } from "@/utils/updateRecord";
-import { updateSessionCache } from "@/utils/updateSessionCache";
 import { useMutation, useQuery } from "@apollo/client";
 import { differenceInMinutes } from "date-fns";
 import { Session } from "next-auth";
@@ -240,18 +240,15 @@ export function RecordProvider({ children }: RecordProviderProps) {
           setRecords: setAllRecordsFromMonthsAgoByCategory,
         });
 
-        localStorage.setItem(
-          `[data-${session?.user?.email}]`,
-          JSON.stringify(result)
-        );
+        updateSessionCache({ session, data: result });
 
         setAllRecordsFromMonthsAgoByCategory(result);
       };
 
-      const dataCached = localStorage.getItem(`[data-${session?.user?.email}]`);
+      const dataCached = getSessionCache(session);
 
       if (dataCached) {
-        setAllRecordsFromMonthsAgoByCategory(JSON.parse(dataCached));
+        setAllRecordsFromMonthsAgoByCategory(dataCached);
         fetchData();
       } else {
         fetchData(true);
