@@ -1,5 +1,6 @@
 import { DialogContext } from "@/contexts/dialogsContext";
 import { RecordContext } from "@/contexts/recordContext";
+import { generateMaskCategory } from "@/utils/generateMaskCategory";
 import DialogMui from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -58,10 +59,7 @@ export function DeleteRecordDialog() {
         </DialogTitle>
         <DialogContent className="flex flex-col gap-3">
           <h1>Título: {recordSelected.title}</h1>
-          <h1>
-            Categoria:{" "}
-            {recordSelected.category === "revenue" ? "Receita" : "Despesa"}
-          </h1>
+          <h1>Categoria: {generateMaskCategory(recordSelected.category)}</h1>
           <h1>
             Valor:{" "}
             {recordSelected.amount?.toLocaleString("pt-br", {

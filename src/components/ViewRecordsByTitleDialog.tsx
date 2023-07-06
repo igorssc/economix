@@ -1,5 +1,6 @@
 import { DialogContext } from "@/contexts/dialogsContext";
 import { RecordContext, RecordType } from "@/contexts/recordContext";
+import { generateMaskCategory } from "@/utils/generateMaskCategory";
 import DialogMui from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -40,7 +41,7 @@ export function ViewRecordsByTitleDialog() {
             {titleSelected.title.charAt(0).toUpperCase() +
               titleSelected.title.slice(1).toLowerCase()}
             <small className="bg-purple-700 rounded-xl px-3 py-[0.125rem] text-white ml-2 text-xs">
-              {titleSelected.category === "revenue" ? "Receita" : "Despesa"}
+              {generateMaskCategory(titleSelected.category)}
             </small>
           </div>
           <div className="flex items-center justify-center">

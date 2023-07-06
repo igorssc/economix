@@ -103,7 +103,10 @@ export function EditRecordDialog() {
       return;
     }
 
-    if (!amount) {
+    if (
+      !amount ||
+      +String(amount).replace(/\./g, "").replace(/\,/g, ".") <= 0
+    ) {
       enqueueSnackbar("Insira um valor válido, por favor!", {
         variant: "warning",
       });

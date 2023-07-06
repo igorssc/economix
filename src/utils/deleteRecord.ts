@@ -1,4 +1,4 @@
-import { removeRecordMutationResponse } from "@/db/removeRecord";
+import { deleteRecordMutationResponse } from "@/db/deleteRecord";
 import {
   ApolloCache,
   DefaultContext,
@@ -6,14 +6,14 @@ import {
   OperationVariables,
 } from "@apollo/client";
 
-interface removeRecordProps {
+interface deleteRecordProps {
   id: string;
   date: string;
 
-  removeRegisterMutateFunction: (
+  deleteRegisterMutateFunction: (
     options?:
       | MutationFunctionOptions<
-          removeRecordMutationResponse,
+          deleteRecordMutationResponse,
           OperationVariables,
           DefaultContext,
           ApolloCache<any>
@@ -22,12 +22,12 @@ interface removeRecordProps {
   ) => Promise<any>;
 }
 
-export const removeRecord = async ({
+export const deleteRecord = async ({
   id,
   date,
-  removeRegisterMutateFunction,
-}: removeRecordProps) => {
-  const registerRemoved = await removeRegisterMutateFunction({
+  deleteRegisterMutateFunction,
+}: deleteRecordProps) => {
+  const registerRemoved = await deleteRegisterMutateFunction({
     variables: {
       id,
     },

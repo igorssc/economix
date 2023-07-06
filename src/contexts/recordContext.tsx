@@ -1,5 +1,6 @@
 "use client";
 import { CREATE_RECORD, createRecordMutationResponse } from "@/db/createRecord";
+import { DELETE_RECORD, deleteRecordMutationResponse } from "@/db/deleteRecord";
 import {
   GET_ALL_AGGREGATIONS_BETWEEN_DATES,
   getAllAggregationsBetweenDatesQueryResponse,
@@ -12,17 +13,18 @@ import {
   PUBLISH_RECORD,
   publishRecordMutationResponse,
 } from "@/db/publishRecord";
-import { REMOVE_RECORD, removeRecordMutationResponse } from "@/db/removeRecord";
 import { UPDATE_RECORD, updateRecordMutationResponse } from "@/db/updateRecord";
 import { arrangeRecordsFromMonths } from "@/utils/arrangeRecordsFromMonths";
 import { countAllQuantitiesAndAmountRecordsOf30DaysAgoByTitle } from "@/utils/countAllQuantitiesAndAmountOf30DaysAgoByTitle";
 import { createRecord } from "@/utils/createRecord";
+import { deleteRecord } from "@/utils/deleteRecord";
 import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
 import { getLastRecords } from "@/utils/getLastRecords";
-import { removeRecord } from "@/utils/removeRecord";
 import { updateRecord } from "@/utils/updateRecord";
+import { updateSessionCache } from "@/utils/updateSessionCache";
 import { useMutation, useQuery } from "@apollo/client";
 import { differenceInMinutes } from "date-fns";
+import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { ReactNode, createContext, useEffect, useState } from "react";
 
@@ -112,7 +114,7 @@ type RecordData = {
     date,
   }: updateType) => Promise<void>;
 
-  removeRecord: ({ id, date }: removeType) => Promise<void>;
+  deleteRecord: ({ id, date }: removeType) => Promise<void>;
 };
 
 export const RecordContext = createContext({} as RecordData);
@@ -129,8 +131,8 @@ export function RecordProvider({ children }: RecordProviderProps) {
   const [updateRegisterMutateFunction] =
     useMutation<updateRecordMutationResponse>(UPDATE_RECORD);
 
-  const [removeRegisterMutateFunction] =
-    useMutation<removeRecordMutationResponse>(REMOVE_RECORD);
+  const [deleteRegisterMutateFunction] =
+    useMutation<deleteRecordMutationResponse>(DELETE_RECORD);
 
   const { refetch: refetchGetAllRecordsFromMonthsAgo } =
     useQuery<getAllAggregationsBetweenDatesQueryResponse>(
@@ -346,6 +348,19 @@ export function RecordProvider({ children }: RecordProviderProps) {
               expenditures: [...prev.expenditures],
               revenues: [...prev.revenues, recordCreated],
             }));
+
+            updateSessionCache({
+              session: session as Session,
+              data: {
+                expenditures: [
+                  ...allRecordsFromMonthsAgoByCategory.expenditures,
+                ],
+                revenues: [
+                  ...allRecordsFromMonthsAgoByCategory.revenues,
+                  recordCreated,
+                ],
+              },
+            });
           }
 
           if (recordCreated.category === "expenditure") {
@@ -353,6 +368,17 @@ export function RecordProvider({ children }: RecordProviderProps) {
               expenditures: [...prev.expenditures, recordCreated],
               revenues: [...prev.revenues],
             }));
+
+            updateSessionCache({
+              session: session as Session,
+              data: {
+                expenditures: [
+                  ...allRecordsFromMonthsAgoByCategory.expenditures,
+                  recordCreated,
+                ],
+                revenues: [...allRecordsFromMonthsAgoByCategory.revenues],
+              },
+            });
           }
         } else {
           setAllRecordsInFuture((prev) =>
@@ -390,6 +416,17 @@ export function RecordProvider({ children }: RecordProviderProps) {
           expenditures: [...prev.expenditures],
           revenues: [...prev.revenues, registerUpdated as RecordType],
         }));
+
+        updateSessionCache({
+          session: session as Session,
+          data: {
+            expenditures: [...allRecordsFromMonthsAgoByCategory.expenditures],
+            revenues: [
+              ...allRecordsFromMonthsAgoByCategory.revenues,
+              registerUpdated,
+            ],
+          },
+        });
       }
 
       if (registerUpdated.category === "expenditure") {
@@ -397,6 +434,16 @@ export function RecordProvider({ children }: RecordProviderProps) {
           expenditures: [...prev.expenditures, registerUpdated as RecordType],
           revenues: [...prev.revenues],
         }));
+        updateSessionCache({
+          session: session as Session,
+          data: {
+            expenditures: [
+              ...allRecordsFromMonthsAgoByCategory.expenditures,
+              registerUpdated,
+            ],
+            revenues: [...allRecordsFromMonthsAgoByCategory.revenues],
+          },
+        });
       }
     } else {
       setAllRecordsInFuture((prev) =>
@@ -410,9 +457,9 @@ export function RecordProvider({ children }: RecordProviderProps) {
   }
 
   async function remove({ id, date }: removeType) {
-    const registerRemoved = await removeRecord({
+    const registerRemoved = await deleteRecord({
       date,
-      removeRegisterMutateFunction,
+      deleteRegisterMutateFunction,
       id,
     });
 
@@ -423,6 +470,17 @@ export function RecordProvider({ children }: RecordProviderProps) {
         ),
         revenues: [...prev.revenues].filter((v) => v.id !== registerRemoved.id),
       }));
+      updateSessionCache({
+        session: session as Session,
+        data: {
+          expenditures: [
+            ...allRecordsFromMonthsAgoByCategory.expenditures,
+          ].filter((v) => v.id !== registerRemoved.id),
+          revenues: [...allRecordsFromMonthsAgoByCategory.revenues].filter(
+            (v) => v.id !== registerRemoved.id
+          ),
+        },
+      });
     } else {
       setAllRecordsInFuture((prev) =>
         [...prev].filter((v) => v.id !== registerRemoved.id)
@@ -445,7 +503,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
         allRecordsInFuture,
         createRecord: create,
         updateRecord: update,
-        removeRecord: remove,
+        deleteRecord: remove,
       }}
     >
       {children}

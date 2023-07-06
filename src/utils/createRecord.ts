@@ -57,7 +57,7 @@ export const createRecord = async ({
       installment: data.installments,
       amount: data.amount,
       description: data.description,
-      date: data.description,
+      date: data.date,
     },
   }).then((response) => response.data?.createRecord as RecordType);
 
