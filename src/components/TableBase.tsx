@@ -154,7 +154,7 @@ export function TableBase({
         scheme="secondary"
         isSmall
         className={twMerge(
-          "gap-2 mt-3 py-2 w-48 max-w-full text-xs font-bold uppercase leading-relaxed [&_.icon]:text-sm [&_.icon]:text-white",
+          "gap-2 mt-3 py-2 w-48 max-w-full text-xs font-bold uppercase leading-relaxed [&_.icon]:text-sm",
           currentLimit && currentLimit >= dataDisplayed.length && "hidden",
           !currentLimit && "hidden"
         )}
