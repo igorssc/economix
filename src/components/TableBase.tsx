@@ -128,7 +128,7 @@ export function TableBase({
             <Table.Row key={i}>
               {head.map((value, index) => (
                 <Table.Data
-                  className={scheme === "primary" ? "" : "text-black"}
+                  className={scheme === "primary" ? "" : "text-gray-500"}
                   key={index}
                   scope="row"
                   {...(typeof v.data[value.name] === "object" &&
