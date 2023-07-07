@@ -105,7 +105,7 @@ export function BiggestExpenseOfTheMonth() {
       </h1>
       <p className="text-center">
         Foi o gasto que você mais teve nos últimos{" "}
-        {periodMonth === 1 ? "30 dias" : "1 mês"},{" "}
+        {periodMonth === 1 ? "30 dias" : `${periodMonth} meses`},{" "}
         {highestExpense?.quantity || 0} vez
         {highestExpense?.quantity > 1 ? "es" : ""}, totalizando{" "}
         {highestExpense?.totalAmount?.toLocaleString("pt-br", {
