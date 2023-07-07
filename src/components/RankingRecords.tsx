@@ -16,7 +16,7 @@ export function RankingRecords() {
 
   const {
     periodDays,
-    periodMonth,
+    periodMonths,
     records,
     setPeriodDays,
     setPeriodMonths,
@@ -37,7 +37,7 @@ export function RankingRecords() {
       countAllQuantitiesAndAmountRecordsByTitle(
         filterRecordsBasedOnPeriod({
           records: [...records],
-          period: periodMonth,
+          period: periodMonths,
           unit: "month",
         })
       )
@@ -53,7 +53,7 @@ export function RankingRecords() {
         <div className="min-[520px]:max-md:ml-auto lg:ml-auto max-[520px]:mt-4 md:max-lg:mt-4">
           <Select
             label="Período"
-            value={periodMonth}
+            value={periodMonths}
             setValue={setPeriodMonths}
             options={selectPeriodMonthsOptions}
           />
@@ -67,7 +67,11 @@ export function RankingRecords() {
       </div>
 
       <div className="relative overflow-x-auto">
-        <TableRanking dataInit={dataDisplayed} period={periodMonth} />
+        <TableRanking
+          dataInit={dataDisplayed}
+          periodMonths={periodMonths}
+          periodDays={periodDays}
+        />
       </div>
     </Box>
   );

@@ -25,10 +25,18 @@ export function ViewRecordsByTitleDialog() {
     setData(() =>
       filterRecordsBasedOnPeriod({
         records: [
-          ...allRecordsFromMonthsAgoByCategory.expenditures,
-          ...allRecordsFromMonthsAgoByCategory.revenues,
+          ...allRecordsFromMonthsAgoByCategory.expenditures.filter((f) =>
+            titleSelected.periodDays === -1
+              ? f
+              : new Date(f.date).getDay() === titleSelected.periodDays
+          ),
+          ...allRecordsFromMonthsAgoByCategory.revenues.filter((f) =>
+            titleSelected.periodDays === -1
+              ? f
+              : new Date(f.date).getDay() === titleSelected.periodDays
+          ),
         ],
-        period: +titleSelected.period,
+        period: titleSelected.periodMonths,
         unit: "month",
       }).filter(
         (value) =>
@@ -71,7 +79,7 @@ export function ViewRecordsByTitleDialog() {
             {...(titleSelected.category === "expenditure" && {
               scheme: "secondary",
             })}
-            period={titleSelected.period}
+            period={titleSelected.periodMonths}
           />
           <TableRecords
             recordsInit={data}

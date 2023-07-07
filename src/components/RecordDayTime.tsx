@@ -7,7 +7,7 @@ import { Select } from "./Select";
 export function RecordDayTime() {
   const {
     periodDays,
-    periodMonth,
+    periodMonths,
     records,
     setPeriodDays,
     setPeriodMonths,
@@ -23,7 +23,7 @@ export function RecordDayTime() {
         <div className="min-[870px]:absolute min-[870px]:top-1/2 min-[870px]:-translate-y-1/2 min-[870px]:right-0 min-[530px]:ml-auto max-[530px]:mt-4">
           <Select
             label="Período"
-            value={periodMonth}
+            value={periodMonths}
             setValue={setPeriodMonths}
             options={selectPeriodMonthsOptions}
           />
@@ -36,7 +36,7 @@ export function RecordDayTime() {
         </div>
       </div>
       <div className="relative overflow-x-auto">
-        <DayByTimeChartChart records={records} period={periodMonth} />
+        <DayByTimeChartChart records={records} period={periodMonths} />
       </div>
     </Box>
   );

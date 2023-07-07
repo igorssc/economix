@@ -7,7 +7,7 @@ import { Select } from "./Select";
 export function IndexOfLastRecords() {
   const {
     periodDays,
-    periodMonth,
+    periodMonths,
     records,
     setPeriodDays,
     setPeriodMonths,
@@ -23,7 +23,7 @@ export function IndexOfLastRecords() {
         <div className="sm:max-md:ml-auto xl:ml-auto max-sm:flex max-sm:justify-center max-sm:items-center max-sm:mt-4 md:max-xl:mt-4 max-[320px]:flex-col">
           <Select
             label="Período"
-            value={periodMonth}
+            value={periodMonths}
             setValue={setPeriodMonths}
             options={selectPeriodMonthsOptions}
           />
@@ -37,7 +37,7 @@ export function IndexOfLastRecords() {
       </div>
 
       <div className="relative overflow-x-auto">
-        <MonthlyChart recordsInit={records} period={periodMonth} />
+        <MonthlyChart recordsInit={records} period={periodMonths} />
       </div>
     </Box>
   );

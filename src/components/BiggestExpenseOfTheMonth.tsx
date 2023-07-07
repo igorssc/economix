@@ -9,7 +9,7 @@ import { Select } from "./Select";
 export function BiggestExpenseOfTheMonth() {
   const {
     periodDays,
-    periodMonth,
+    periodMonths,
     records,
     setPeriodDays,
     setPeriodMonths,
@@ -80,7 +80,7 @@ export function BiggestExpenseOfTheMonth() {
       <div className="flex items-center justify-center max-[320px]:flex-col">
         <Select
           label="Período"
-          value={periodMonth}
+          value={periodMonths}
           setValue={setPeriodMonths}
           options={selectPeriodMonthsOptions}
         />
@@ -105,7 +105,7 @@ export function BiggestExpenseOfTheMonth() {
       </h1>
       <p className="text-center">
         Foi o gasto que você mais teve nos últimos{" "}
-        {periodMonth === 1 ? "30 dias" : `${periodMonth} meses`},{" "}
+        {periodMonths === 1 ? "30 dias" : `${periodMonths} meses`},{" "}
         {highestExpense?.quantity || 0} vez
         {highestExpense?.quantity > 1 ? "es" : ""}, totalizando{" "}
         {highestExpense?.totalAmount?.toLocaleString("pt-br", {

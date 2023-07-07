@@ -9,10 +9,15 @@ import { TableBase } from "./TableBase";
 
 interface TableRankingProps {
   dataInit?: countAllQuantitiesAndAmountOf30DaysAgoByTitleType | null;
-  period?: number;
+  periodMonths?: number;
+  periodDays?: number;
 }
 
-export function TableRanking({ dataInit = null, period }: TableRankingProps) {
+export function TableRanking({
+  dataInit = null,
+  periodMonths,
+  periodDays,
+}: TableRankingProps) {
   const { countAllQuantitiesAndAmountOf30DaysAgoByTitle } =
     useContext(RecordContext);
 
@@ -56,7 +61,8 @@ export function TableRanking({ dataInit = null, period }: TableRankingProps) {
               setTitleSelected({
                 title: data.title,
                 category: data.category,
-                period: period || 1,
+                periodMonths: periodMonths ?? 1,
+                periodDays: periodDays ?? -1,
               });
               setIsOpenViewRecordsByTitleDialog(true);
             },

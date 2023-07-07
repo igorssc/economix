@@ -16,7 +16,7 @@ interface SelectFilterRecordsProviderProps {
 }
 
 type SelectFilterRecordsData = {
-  periodMonth: number;
+  periodMonths: number;
   setPeriodMonths: Dispatch<SetStateAction<number>>;
 
   periodDays: number;
@@ -42,7 +42,7 @@ export const SelectFilterRecordsContext = createContext(
 export function SelectFilterRecordsProvider({
   children,
 }: SelectFilterRecordsProviderProps) {
-  const [periodMonth, setPeriodMonths] = useState(1);
+  const [periodMonths, setPeriodMonths] = useState(1);
   const [periodDays, setPeriodDays] = useState(-1);
   const [records, setRecords] = useState<RecordType[]>([]);
 
@@ -65,11 +65,11 @@ export function SelectFilterRecordsProvider({
             periodDays === -1 ? f : new Date(f.date).getDay() === periodDays
           ),
         ],
-        period: periodMonth,
+        period: periodMonths,
         unit: "month",
       })
     );
-  }, [periodMonth, periodDays, allRecordsFromMonthsAgoByCategory]);
+  }, [periodMonths, periodDays, allRecordsFromMonthsAgoByCategory]);
 
   const selectPeriodMonthsOptions = [
     {
@@ -138,7 +138,7 @@ export function SelectFilterRecordsProvider({
       value={{
         periodDays,
         setPeriodDays,
-        periodMonth,
+        periodMonths,
         setPeriodMonths,
         records,
         selectPeriodDaysOptions,
