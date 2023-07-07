@@ -1,7 +1,8 @@
 import { RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
 import { getWeekday } from "@/utils/getWeekday";
-import { differenceInDays, subMonths } from "date-fns";
+import { differenceInDays, format, parse, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useContext, useEffect, useState } from "react";
 import {
   Area,
@@ -28,7 +29,7 @@ export function DetailsByTitleChart({
 
   const [data, setData] = useState(
     [] as {
-      name: string;
+      date: string;
       value: number;
     }[]
   );
@@ -52,9 +53,12 @@ export function DetailsByTitleChart({
         },
         (_, i) => {
           return {
-            name: new Date(
+            date: new Date(
               new Date().setDate(new Date().getDate() - i)
-            ).toLocaleDateString("pt-br", { month: "2-digit", day: "2-digit" }),
+            ).toLocaleDateString("pt-br", {
+              month: "2-digit",
+              day: "2-digit",
+            }),
             value: records
               .filter(
                 (v) =>
@@ -78,7 +82,9 @@ export function DetailsByTitleChart({
   const customXTick = (props: any) => {
     const { x, y, payload } = props;
 
-    const weekday = getWeekday(payload.value);
+    const prevValue = payload.value;
+
+    const weekday = getWeekday(prevValue);
 
     return (
       <g transform={`translate(${x},${y})`}>
@@ -94,9 +100,12 @@ export function DetailsByTitleChart({
                 : "rgb(159, 2, 2)"
               : "#000"
           }
-          className="text-[0.6rem] font-bold"
+          className={twMerge(
+            "text-[0.6rem]",
+            (weekday === 6 || weekday === 0) && "font-bold"
+          )}
         >
-          {payload.value}
+          {prevValue}
         </text>
       </g>
     );
@@ -111,9 +120,19 @@ export function DetailsByTitleChart({
 
   const renderTooltipContent = (data: any) => {
     if (data.payload && data.payload.length > 0) {
-      const { name, value } = data.payload[0].payload;
+      const { date, value } = data.payload[0].payload;
 
-      const weekday = getWeekday(name);
+      const weekday = getWeekday(date);
+
+      const dayOfWeek = format(
+        parse(date, "dd/MM", new Date()),
+        "EEEE, dd 'de' MMMM",
+        { locale: ptBR }
+      );
+
+      const formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
+        .slice(1)
+        .replace("-", " ")}`;
 
       return (
         <div className="text-xs">
@@ -127,7 +146,7 @@ export function DetailsByTitleChart({
                 : ""
             )}
           >
-            {name}
+            {formattedDate}
           </span>
           {/* {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()} */}
           <br />
@@ -142,7 +161,7 @@ export function DetailsByTitleChart({
     <ResponsiveContainer width="100%" height={250} className="mt-6">
       <AreaChart data={data} margin={{ left: -50, right: 10, top: 0 }}>
         <XAxis
-          dataKey="name"
+          dataKey="date"
           axisLine={{ display: "none" }}
           tick={customXTick}
           tickLine={{ display: "none" }}

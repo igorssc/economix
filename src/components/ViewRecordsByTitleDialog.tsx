@@ -73,7 +73,11 @@ export function ViewRecordsByTitleDialog() {
             })}
             period={titleSelected.period}
           />
-          <TableRecords recordsInit={data} hide={["title", "category"]} />
+          <TableRecords
+            recordsInit={data}
+            hide={["title", "category"]}
+            scheme="secondary"
+          />
         </DialogContent>
       </DialogMui>
     </>

@@ -9,6 +9,7 @@ interface TableRecordsProps {
   hide?: string[];
   recordsInit?: RecordType[] | null;
   limit?: number;
+  scheme?: "primary" | "secondary";
 }
 
 export function TableRecords({
@@ -16,6 +17,7 @@ export function TableRecords({
   hide = [],
   recordsInit = null,
   limit,
+  scheme = "primary",
 }: TableRecordsProps) {
   const { allRecordsFrom30DaysAgo, allRecordsInFuture } =
     useContext(RecordContext);
@@ -61,6 +63,7 @@ export function TableRecords({
 
   return (
     <TableBase
+      scheme={scheme}
       {...(limit && { limit })}
       data={recordsDisplayed.map((record) => ({
         data: {

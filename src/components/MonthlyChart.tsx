@@ -1,7 +1,8 @@
 import { RecordContext, RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
 import { getWeekday } from "@/utils/getWeekday";
-import { differenceInDays, subMonths } from "date-fns";
+import { differenceInDays, format, parse, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useContext, useEffect, useState } from "react";
 import {
   Area,
@@ -24,7 +25,7 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
 
   const [data, setData] = useState(
     [] as {
-      name: string;
+      date: string;
       value1: number;
       value2: number;
     }[]
@@ -68,9 +69,12 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
         },
         (_, i) => {
           return {
-            name: new Date(
+            date: new Date(
               new Date().setDate(new Date().getDate() - i)
-            ).toLocaleDateString("pt-br", { month: "2-digit", day: "2-digit" }),
+            ).toLocaleDateString("pt-br", {
+              month: "2-digit",
+              day: "2-digit",
+            }),
             value1: recordsDisplayed
               .filter((v) => v.category === "revenue")
               .filter(
@@ -120,8 +124,17 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
           y={0}
           dy={16}
           textAnchor="end"
-          fill={weekday === 6 || weekday === 0 ? "rgb(126, 34, 206)" : "#000"}
-          className="text-[0.6rem] font-bold"
+          fill={
+            weekday === 6 || weekday === 0
+              ? "rgb(126, 34, 206)"
+              : theme === "dark"
+              ? "#fff"
+              : "#000"
+          }
+          className={twMerge(
+            "text-[0.6rem]",
+            (weekday === 6 || weekday === 0) && "font-bold"
+          )}
         >
           {prevValue}
         </text>
@@ -138,20 +151,31 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
 
   const renderTooltipContent = (data: any) => {
     if (data.payload && data.payload.length > 0) {
-      const { name, value1, value2 } = data.payload[0].payload;
+      const { date, value1, value2 } = data.payload[0].payload;
 
-      const weekday = getWeekday(name);
+      const weekday = getWeekday(date);
+
+      const dayOfWeek = format(
+        parse(date, "dd/MM", new Date()),
+        "EEEE, dd 'de' MMMM",
+        {
+          locale: ptBR,
+        }
+      );
+      const formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
+        .slice(1)
+        .replace("-", " ")}`;
 
       return (
         <div className="text-xs">
           <span
             className={twMerge(
-              "font-bold",
-              (weekday === 6 || weekday === 0) &&
-                (value1 >= value2 ? "text-purple-700" : "text-red-700")
+              "font-bold"
+              // (weekday === 6 || weekday === 0) &&
+              //   (value1 >= value2 ? "text-purple-700" : "text-red-700")
             )}
           >
-            {name}
+            {formattedDate}
           </span>
           <br />
           R$ {value1.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
@@ -169,7 +193,7 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
     <ResponsiveContainer width="100%" height={250} className="mt-6">
       <AreaChart data={data} margin={{ left: -50, right: 10, top: 10 }}>
         <XAxis
-          dataKey="name"
+          dataKey="date"
           axisLine={{ display: "none" }}
           tick={customXTick}
           tickLine={{ display: "none" }}

@@ -1,7 +1,8 @@
 import { RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
 import { getWeekday } from "@/utils/getWeekday";
-import { differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useContext, useEffect, useState } from "react";
 import {
   ResponsiveContainer,
@@ -89,8 +90,17 @@ export function DayByTimeChartChart({
           y={0}
           dy={16}
           textAnchor="end"
-          fill={weekday === 6 || weekday === 0 ? "rgb(126, 34, 206)" : "#000"}
-          className="text-[0.6rem] font-bold"
+          fill={
+            weekday === 6 || weekday === 0
+              ? "rgb(126, 34, 206)"
+              : theme === "dark"
+              ? "#fff"
+              : "#000"
+          }
+          className={twMerge(
+            "text-[0.6rem]",
+            (weekday === 6 || weekday === 0) && "font-bold"
+          )}
         >
           {prevValue}
         </text>
@@ -102,19 +112,22 @@ export function DayByTimeChartChart({
     if (data.payload && data.payload.length > 0) {
       const { x, y } = data.payload[0].payload;
 
-      const prevValue = new Date(
-        new Date().setDate(new Date().getDate() - x)
-      ).toLocaleDateString("pt-br", { day: "2-digit", month: "2-digit" });
+      const prevValue = new Date(new Date().setDate(new Date().getDate() - x));
 
-      const weekday = getWeekday(prevValue);
+      const dayOfWeek = format(prevValue, "EEEE, dd 'de' MMMM", {
+        locale: ptBR,
+      });
+      const formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
+        .slice(1)
+        .replace("-", " ")}`;
 
       return (
         <div className="text-xs">
-          {prevValue}
+          {formattedDate}
           <br />
           <span
             className={twMerge(
-              (weekday === 6 || weekday === 0) && "font-bold",
+              "font-bold",
               data.payload[0].payload.category === "revenue"
                 ? "text-purple-700"
                 : "text-red-700"

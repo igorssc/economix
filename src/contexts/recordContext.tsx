@@ -136,14 +136,16 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
   const { refetch: refetchGetAllRecordsFromMonthsAgo } =
     useQuery<getAllAggregationsBetweenDatesQueryResponse>(
-      GET_ALL_AGGREGATIONS_BETWEEN_DATES
+      GET_ALL_AGGREGATIONS_BETWEEN_DATES,
+      { skip: true }
     );
 
   const {
     data: dataGetAllRecordsInFuture,
     refetch: refetchGetAllRecordsInFuture,
   } = useQuery<getAllAggregationsInFutureResponse>(
-    GET_ALL_AGGREGATIONS_IN_THE_FUTURE
+    GET_ALL_AGGREGATIONS_IN_THE_FUTURE,
+    { skip: true }
   );
 
   const [
@@ -251,13 +253,14 @@ export function RecordProvider({ children }: RecordProviderProps) {
       } else {
         fetchData(true);
       }
+
+      refetchGetAllRecordsInFuture({
+        email: session?.user?.email,
+        dateGTE: new Date().toISOString(),
+        skip: 0,
+      });
     }
 
-    refetchGetAllRecordsInFuture({
-      email: session?.user?.email,
-      dateGTE: new Date().toISOString(),
-      skip: 0,
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.email]);
 

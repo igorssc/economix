@@ -24,6 +24,7 @@ interface TableBaseProps {
   head: headType[];
   data: dataType[];
   limit?: number;
+  scheme?: "primary" | "secondary";
 }
 
 export function TableBase({
@@ -31,6 +32,7 @@ export function TableBase({
   head,
   data,
   limit,
+  scheme = "primary",
 }: TableBaseProps) {
   const [sortingBase, setSortingBase] =
     useState<sortingBaseType>(sortingBaseDefault);
@@ -100,7 +102,11 @@ export function TableBase({
   return (
     <>
       <Table.Root>
-        <Table.Head>
+        <Table.Head
+          className={
+            scheme === "primary" ? "" : "bg-purple-700 dark:bg-purple-700"
+          }
+        >
           <Table.Row>
             {head.map((item, index) => (
               <Table.Header
@@ -122,6 +128,7 @@ export function TableBase({
             <Table.Row key={i}>
               {head.map((value, index) => (
                 <Table.Data
+                  className={scheme === "primary" ? "" : "text-black"}
                   key={index}
                   scope="row"
                   {...(typeof v.data[value.name] === "object" &&
