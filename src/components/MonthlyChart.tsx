@@ -1,5 +1,6 @@
-import { RecordContext } from "@/contexts/recordContext";
+import { RecordContext, RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
+import { differenceInDays, subMonths } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import {
   Area,
@@ -10,7 +11,12 @@ import {
   YAxis,
 } from "recharts";
 
-export function CurrentMonthChart() {
+interface MonthlyChartProps {
+  recordsInit?: RecordType[] | null;
+  period?: number;
+}
+
+export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
   const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
   const { theme } = useContext(ThemeContext);
 
@@ -22,45 +28,81 @@ export function CurrentMonthChart() {
     }[]
   );
 
+  const [recordsDisplayed, setRecordsDisplayed] = useState<RecordType[]>([]);
+
+  useEffect(() => {
+    if (recordsInit) {
+      setRecordsDisplayed(recordsInit);
+    } else {
+      setRecordsDisplayed(allRecordsFrom30DaysAgo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!recordsInit) {
+      setRecordsDisplayed(allRecordsFrom30DaysAgo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRecordsFrom30DaysAgo]);
+
+  useEffect(() => {
+    recordsInit && setRecordsDisplayed(recordsInit);
+  }, [recordsInit]);
+
   useEffect(() => {
     setData(
-      Array.from({ length: 30 }, (_, i) => {
-        return {
-          name: new Date(
-            new Date().setDate(new Date().getDate() - i)
-          ).toLocaleDateString("pt-br", { month: "2-digit", day: "2-digit" }),
-          value1: allRecordsFrom30DaysAgo
-            .filter((v) => v.category === "revenue")
-            .filter(
-              (v) =>
-                new Date(v.date).getDate() ===
+      Array.from(
+        {
+          length:
+            recordsInit && period
+              ? differenceInDays(
+                  new Date(),
                   new Date(
-                    new Date().setDate(new Date().getDate() - i)
-                  ).getDate() &&
-                new Date(v.date).getMonth() ===
-                  new Date(
-                    new Date().setDate(new Date().getDate() - i)
-                  ).getMonth()
-            )
-            .reduce((acc, v) => (acc += v.amount), 0),
-          value2: allRecordsFrom30DaysAgo
-            .filter((v) => v.category === "expenditure")
-            .filter(
-              (v) =>
-                new Date(v.date).getDate() ===
-                  new Date(
-                    new Date().setDate(new Date().getDate() - i)
-                  ).getDate() &&
-                new Date(v.date).getMonth() ===
-                  new Date(
-                    new Date().setDate(new Date().getDate() - i)
-                  ).getMonth()
-            )
-            .reduce((acc, v) => (acc += v.amount), 0),
-        };
-      }).reverse()
+                    subMonths(new Date(), period).setDate(new Date().getDate())
+                  )
+                )
+              : 30,
+        },
+        (_, i) => {
+          return {
+            name: new Date(
+              new Date().setDate(new Date().getDate() - i)
+            ).toLocaleDateString("pt-br", { month: "2-digit", day: "2-digit" }),
+            value1: recordsDisplayed
+              .filter((v) => v.category === "revenue")
+              .filter(
+                (v) =>
+                  new Date(v.date).getDate() ===
+                    new Date(
+                      new Date().setDate(new Date().getDate() - i)
+                    ).getDate() &&
+                  new Date(v.date).getMonth() ===
+                    new Date(
+                      new Date().setDate(new Date().getDate() - i)
+                    ).getMonth()
+              )
+              .reduce((acc, v) => (acc += v.amount), 0),
+            value2: recordsDisplayed
+              .filter((v) => v.category === "expenditure")
+              .filter(
+                (v) =>
+                  new Date(v.date).getDate() ===
+                    new Date(
+                      new Date().setDate(new Date().getDate() - i)
+                    ).getDate() &&
+                  new Date(v.date).getMonth() ===
+                    new Date(
+                      new Date().setDate(new Date().getDate() - i)
+                    ).getMonth()
+              )
+              .reduce((acc, v) => (acc += v.amount), 0),
+          };
+        }
+      ).reverse()
     );
-  }, [allRecordsFrom30DaysAgo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recordsDisplayed]);
 
   const formatXAxisTick = (value: string, _index: number) => {
     return value;

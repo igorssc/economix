@@ -1,5 +1,6 @@
 import { RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
+import { differenceInDays, subMonths } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import {
   Area,
@@ -13,11 +14,13 @@ import {
 interface DetailsByTitleChartProps {
   records: RecordType[];
   scheme?: "primary" | "secondary";
+  period?: number;
 }
 
 export function DetailsByTitleChart({
   records,
   scheme = "primary",
+  period,
 }: DetailsByTitleChartProps) {
   const { theme } = useContext(ThemeContext);
 
@@ -32,27 +35,42 @@ export function DetailsByTitleChart({
 
   useEffect(() => {
     setData(
-      Array.from({ length: 30 }, (_, i) => {
-        return {
-          name: new Date(
-            new Date().setDate(new Date().getDate() - i)
-          ).toLocaleDateString("pt-br", { month: "2-digit", day: "2-digit" }),
-          value: records
-            .filter(
-              (v) =>
-                new Date(v.date).getDate() ===
+      Array.from(
+        {
+          length: period
+            ? period === 1
+              ? 30
+              : differenceInDays(
+                  new Date(),
                   new Date(
-                    new Date().setDate(new Date().getDate() - i)
-                  ).getDate() &&
-                new Date(v.date).getMonth() ===
-                  new Date(
-                    new Date().setDate(new Date().getDate() - i)
-                  ).getMonth()
-            )
-            .reduce((acc, v) => (acc += v.amount), 0),
-        };
-      }).reverse()
+                    subMonths(new Date(), period).setDate(new Date().getDate())
+                  )
+                )
+            : 30,
+        },
+        (_, i) => {
+          return {
+            name: new Date(
+              new Date().setDate(new Date().getDate() - i)
+            ).toLocaleDateString("pt-br", { month: "2-digit", day: "2-digit" }),
+            value: records
+              .filter(
+                (v) =>
+                  new Date(v.date).getDate() ===
+                    new Date(
+                      new Date().setDate(new Date().getDate() - i)
+                    ).getDate() &&
+                  new Date(v.date).getMonth() ===
+                    new Date(
+                      new Date().setDate(new Date().getDate() - i)
+                    ).getMonth()
+              )
+              .reduce((acc, v) => (acc += v.amount), 0),
+          };
+        }
+      ).reverse()
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records]);
 
   const customXTick = (props: any) => {

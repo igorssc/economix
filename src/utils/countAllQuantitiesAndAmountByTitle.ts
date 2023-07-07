@@ -1,6 +1,6 @@
 import { RecordType } from "@/contexts/recordContext";
 
-export const countAllQuantitiesAndAmountRecordsOf30DaysAgoByTitle = (
+export const countAllQuantitiesAndAmountRecordsByTitle = (
   records: RecordType[]
 ) => {
   const prevArray = [] as {

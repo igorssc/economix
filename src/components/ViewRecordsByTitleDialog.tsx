@@ -1,5 +1,6 @@
 import { DialogContext } from "@/contexts/dialogsContext";
 import { RecordContext, RecordType } from "@/contexts/recordContext";
+import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
 import { generateMaskCategory } from "@/utils/generateMaskCategory";
 import DialogMui from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -16,20 +17,27 @@ export function ViewRecordsByTitleDialog() {
     titleSelected,
   } = useContext(DialogContext);
 
-  const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
+  const { allRecordsFromMonthsAgoByCategory } = useContext(RecordContext);
 
   const [data, setData] = useState<RecordType[]>([]);
 
   useEffect(() => {
     setData(() =>
-      allRecordsFrom30DaysAgo.filter(
+      filterRecordsBasedOnPeriod({
+        records: [
+          ...allRecordsFromMonthsAgoByCategory.expenditures,
+          ...allRecordsFromMonthsAgoByCategory.revenues,
+        ],
+        period: +titleSelected.period,
+        unit: "month",
+      }).filter(
         (value) =>
           value.category === titleSelected.category &&
           value.title === titleSelected.title
       )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRecordsFrom30DaysAgo, titleSelected]);
+  }, [allRecordsFromMonthsAgoByCategory, titleSelected]);
 
   const handleClose = () => {
     setData([]);
@@ -63,6 +71,7 @@ export function ViewRecordsByTitleDialog() {
             {...(titleSelected.category === "expenditure" && {
               scheme: "secondary",
             })}
+            period={titleSelected.period}
           />
           <TableRecords recordsInit={data} hide={["title", "category"]} />
         </DialogContent>

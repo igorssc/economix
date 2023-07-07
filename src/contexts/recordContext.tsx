@@ -15,7 +15,7 @@ import {
 } from "@/db/publishRecord";
 import { UPDATE_RECORD, updateRecordMutationResponse } from "@/db/updateRecord";
 import { arrangeRecordsFromMonths } from "@/utils/arrangeRecordsFromMonths";
-import { countAllQuantitiesAndAmountRecordsOf30DaysAgoByTitle } from "@/utils/countAllQuantitiesAndAmountOf30DaysAgoByTitle";
+import { countAllQuantitiesAndAmountRecordsByTitle } from "@/utils/countAllQuantitiesAndAmountByTitle";
 import { createRecord } from "@/utils/createRecord";
 import { deleteRecord } from "@/utils/deleteRecord";
 import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
@@ -224,9 +224,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
 
   useEffect(() => {
     setCountAllQuantitiesAndAmountOf30DaysAgoByTitle(
-      countAllQuantitiesAndAmountRecordsOf30DaysAgoByTitle(
-        allRecordsFrom30DaysAgo
-      )
+      countAllQuantitiesAndAmountRecordsByTitle(allRecordsFrom30DaysAgo)
     );
   }, [allRecordsFrom30DaysAgo]);
 

@@ -34,11 +34,13 @@ interface DialogData {
   titleSelected: {
     title: string;
     category: string;
+    period: number;
   };
   setTitleSelected: Dispatch<
     SetStateAction<{
       title: string;
       category: string;
+      period: number;
     }>
   >;
 }
@@ -58,6 +60,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
   const [titleSelected, setTitleSelected] = useState({
     title: "",
     category: "",
+    period: 0,
   });
 
   const [recordSelected, setRecordSelected] = useState({} as RecordType);

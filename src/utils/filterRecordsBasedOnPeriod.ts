@@ -3,7 +3,7 @@ import {
   differenceInCalendarDays,
   differenceInCalendarMonths,
   differenceInDays,
-  differenceInMonths,
+  subMonths,
 } from "date-fns";
 
 interface filterRecordsBasedOnPeriodProps {
@@ -17,29 +17,32 @@ export const filterRecordsBasedOnPeriod = ({
   unit,
   period,
 }: filterRecordsBasedOnPeriodProps) => {
+  const currentDate = new Date();
+
   return records
     .filter((record) => {
       if (
         unit === "day" &&
-        differenceInDays(new Date(), new Date(record.date)) <= period
+        differenceInDays(currentDate, new Date(record.date)) <= period
       ) {
         return true;
       }
       if (
         unit === "calendar-day" &&
-        differenceInCalendarDays(new Date(), new Date(record.date)) <= period
+        differenceInCalendarDays(currentDate, new Date(record.date)) <= period
       ) {
         return true;
       }
       if (
         unit === "month" &&
-        differenceInMonths(new Date(), new Date(record.date)) <= period
+        new Date(record.date).getTime() >=
+          subMonths(currentDate, period).setDate(currentDate.getDate())
       ) {
         return true;
       }
       if (
         unit === "calendar-month" &&
-        differenceInCalendarMonths(new Date(), new Date(record.date)) <= period
+        differenceInCalendarMonths(currentDate, new Date(record.date)) <= period
       ) {
         return true;
       }

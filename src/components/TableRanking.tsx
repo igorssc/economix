@@ -1,20 +1,51 @@
 import { DialogContext } from "@/contexts/dialogsContext";
-import { RecordContext } from "@/contexts/recordContext";
+import {
+  RecordContext,
+  countAllQuantitiesAndAmountOf30DaysAgoByTitleType,
+} from "@/contexts/recordContext";
 import { generateMaskCategory } from "@/utils/generateMaskCategory";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TableBase } from "./TableBase";
 
-export function TableRanking() {
+interface TableRankingProps {
+  dataInit?: countAllQuantitiesAndAmountOf30DaysAgoByTitleType | null;
+  period?: number;
+}
+
+export function TableRanking({ dataInit = null, period }: TableRankingProps) {
   const { countAllQuantitiesAndAmountOf30DaysAgoByTitle } =
     useContext(RecordContext);
 
   const { setIsOpenViewRecordsByTitleDialog, setTitleSelected } =
     useContext(DialogContext);
 
+  const [dataDisplayed, setDataDisplayed] =
+    useState<countAllQuantitiesAndAmountOf30DaysAgoByTitleType>([]);
+
+  useEffect(() => {
+    if (dataInit) {
+      setDataDisplayed(dataInit);
+    } else {
+      setDataDisplayed(countAllQuantitiesAndAmountOf30DaysAgoByTitle);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!dataInit) {
+      setDataDisplayed(countAllQuantitiesAndAmountOf30DaysAgoByTitle);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countAllQuantitiesAndAmountOf30DaysAgoByTitle]);
+
+  useEffect(() => {
+    dataInit && setDataDisplayed(dataInit);
+  }, [dataInit]);
+
   return (
     <TableBase
       limit={5}
-      data={countAllQuantitiesAndAmountOf30DaysAgoByTitle.map((data) => ({
+      data={dataDisplayed.map((data) => ({
         data: {
           title: {
             type: "string",
@@ -25,6 +56,7 @@ export function TableRanking() {
               setTitleSelected({
                 title: data.title,
                 category: data.category,
+                period: period || 1,
               });
               setIsOpenViewRecordsByTitleDialog(true);
             },

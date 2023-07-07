@@ -50,8 +50,6 @@ export const getLastRecords = async ({
           });
 
           result.data.recordsConnection.edges.forEach((v) => {
-            console.log(recordsFromMonthsAgoByCategory);
-
             if (v.node.category === "expenditure") {
               recordsFromMonthsAgoByCategory.expenditures.push(
                 v.node as RecordType
