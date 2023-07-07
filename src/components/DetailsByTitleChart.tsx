@@ -1,5 +1,6 @@
 import { RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
+import { getWeekday } from "@/utils/getWeekday";
 import { differenceInDays, subMonths } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { twMerge } from "tailwind-merge";
 
 interface DetailsByTitleChartProps {
   records: RecordType[];
@@ -76,23 +78,6 @@ export function DetailsByTitleChart({
   const customXTick = (props: any) => {
     const { x, y, payload } = props;
 
-    const getWeekday = (formattedDate: string) => {
-      const currentDate = new Date();
-      const [dia, mes] = formattedDate.split("/");
-
-      let ano = currentDate.getFullYear(); // Obtém o ano corrente
-      if (parseInt(mes) > currentDate.getMonth() + 1) {
-        // Se o mês da data fornecida for maior que o mês atual, subtrai 1 do ano
-        ano--;
-      }
-
-      const data = new Date(`${ano}-${mes}-${dia}:00:00`);
-
-      const weekday = data.getDay(); // Retorna um número de 0 a 6, onde 0 é domingo e 6 é sábado
-
-      return weekday;
-    };
-
     const weekday = getWeekday(payload.value);
 
     return (
@@ -109,7 +94,7 @@ export function DetailsByTitleChart({
                 : "rgb(159, 2, 2)"
               : "#000"
           }
-          className="text-[0.6rem]"
+          className="text-[0.6rem] font-bold"
         >
           {payload.value}
         </text>
@@ -127,9 +112,24 @@ export function DetailsByTitleChart({
   const renderTooltipContent = (data: any) => {
     if (data.payload && data.payload.length > 0) {
       const { name, value } = data.payload[0].payload;
+
+      const weekday = getWeekday(name);
+
       return (
         <div className="text-xs">
-          {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
+          <span
+            className={twMerge(
+              "",
+              weekday === 6 || weekday === 0
+                ? scheme === "primary"
+                  ? "font-bold text-purple-700"
+                  : "font-bold text-red-700"
+                : ""
+            )}
+          >
+            {name}
+          </span>
+          {/* {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()} */}
           <br />
           R$ {value.toLocaleString("pt-br", { minimumFractionDigits: 2 })}
         </div>

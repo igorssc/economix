@@ -2,6 +2,7 @@ import {
   RecordContext,
   countAllQuantitiesAndAmountOf30DaysAgoByTitleType,
 } from "@/contexts/recordContext";
+import { SelectFilterRecordsContext } from "@/contexts/selectFilterRecordsContext";
 import { countAllQuantitiesAndAmountRecordsByTitle } from "@/utils/countAllQuantitiesAndAmountByTitle";
 import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
 import { useContext, useEffect, useState } from "react";
@@ -10,12 +11,19 @@ import { Select } from "./Select";
 import { TableRanking } from "./TableRanking";
 
 export function RankingRecords() {
-  const {
-    allRecordsFromMonthsAgoByCategory,
-    countAllQuantitiesAndAmountOf30DaysAgoByTitle,
-  } = useContext(RecordContext);
+  const { countAllQuantitiesAndAmountOf30DaysAgoByTitle } =
+    useContext(RecordContext);
 
-  const [period, setPeriod] = useState("1 mês");
+  const {
+    periodDays,
+    periodMonth,
+    records,
+    setPeriodDays,
+    setPeriodMonths,
+    selectPeriodDaysOptions,
+    selectPeriodMonthsOptions,
+  } = useContext(SelectFilterRecordsContext);
+
   const [dataDisplayed, setDataDisplayed] =
     useState<countAllQuantitiesAndAmountOf30DaysAgoByTitleType>([]);
 
@@ -28,50 +36,38 @@ export function RankingRecords() {
     setDataDisplayed(
       countAllQuantitiesAndAmountRecordsByTitle(
         filterRecordsBasedOnPeriod({
-          records: [
-            ...allRecordsFromMonthsAgoByCategory.expenditures,
-            ...allRecordsFromMonthsAgoByCategory.revenues,
-          ],
-          period: +period.split(" ")[0],
+          records: [...records],
+          period: periodMonth,
           unit: "month",
         })
       )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period, allRecordsFromMonthsAgoByCategory]);
-
-  const selectOptions = [
-    "1 mês",
-    "2 meses",
-    "3 meses",
-    "4 meses",
-    "5 meses",
-    "6 meses",
-    "7 meses",
-    "8 meses",
-    "9 meses",
-    "10 meses",
-    "11 meses",
-    "12 meses",
-  ];
+  }, [records]);
 
   return (
     <Box className="sm:col-span-6 md:col-span-3 max-md:order-3">
-      <div className="flex items-center justify-center mb-4">
+      <div className="flex items-center justify-center mb-4 max-[520px]:flex-col md:max-lg:flex-col">
         <h1 className="text-center">Ranking de registros</h1>
 
-        <div className="ml-auto">
+        <div className="min-[520px]:max-md:ml-auto lg:ml-auto max-[520px]:mt-4 md:max-lg:mt-4">
           <Select
             label="Período"
-            value={period}
-            setValue={setPeriod}
-            options={selectOptions}
+            value={periodMonth}
+            setValue={setPeriodMonths}
+            options={selectPeriodMonthsOptions}
+          />
+          <Select
+            label="Dias"
+            value={periodDays}
+            setValue={setPeriodDays}
+            options={selectPeriodDaysOptions}
           />
         </div>
       </div>
 
       <div className="relative overflow-x-auto">
-        <TableRanking dataInit={dataDisplayed} period={+period.split(" ")[0]} />
+        <TableRanking dataInit={dataDisplayed} period={periodMonth} />
       </div>
     </Box>
   );

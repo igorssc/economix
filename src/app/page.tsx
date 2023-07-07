@@ -4,7 +4,6 @@ import { AnnualDataChart } from "@/components/AnnualDataChart";
 import { BiggestExpenseOfTheMonth } from "@/components/BiggestExpenseOfTheMonth";
 import { Box } from "@/components/Box";
 import { Button } from "@/components/Button";
-import { DayByTimeChartChart } from "@/components/DayByTimeChartChart";
 import { ExpenseChart } from "@/components/ExpenseChart";
 import { IndexOfLastRecords } from "@/components/IndexOfLastRecords";
 import { LatestRecords } from "@/components/LatestRecords";
@@ -12,11 +11,13 @@ import { MonthlyProfitChart } from "@/components/MonthlyProfitChart";
 import { Nav } from "@/components/Nav";
 import { NewRegisterButton } from "@/components/NewRegisterButton";
 import { RankingRecords } from "@/components/RankingRecords";
+import { RecordDayTime } from "@/components/RecordDayTime";
 import { SkeletonDashboard } from "@/components/SkeletonDashboard";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
 import { TableRecords } from "@/components/TableRecords";
 import { DialogContext } from "@/contexts/dialogsContext";
 import { RecordContext } from "@/contexts/recordContext";
+import { SelectFilterRecordsProvider } from "@/contexts/selectFilterRecordsContext";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -87,29 +88,39 @@ export default function Dashboard() {
 
           <AnnualDataChart />
           <div className="flex flex-col sm:grid sm:grid-cols-6 md:col-span-2 gap-4 mt-4">
-            <BiggestExpenseOfTheMonth />
+            <SelectFilterRecordsProvider>
+              <BiggestExpenseOfTheMonth />
+            </SelectFilterRecordsProvider>
 
-            <Box className="sm:col-span-3 md:col-span-2">
+            <Box className="sm:col-span-3 md:col-span-3 lg:col-span-2">
               <h1 className="text-center">Quantidade de gastos mensais</h1>
               <ExpenseChart />
             </Box>
-            <Box className="sm:col-span-3 md:col-span-2">
+            <Box className="sm:col-span-3 md:col-span-3 lg:col-span-2">
               <h1 className="text-center">Lucro mensal</h1>
               <MonthlyProfitChart />
             </Box>
-            <Box className="col-span-6">
-              <h1 className="text-center">Registros - Dia x Hora</h1>
-              <DayByTimeChartChart />
-            </Box>
 
-            <LatestRecords />
+            <SelectFilterRecordsProvider>
+              <RecordDayTime />
+            </SelectFilterRecordsProvider>
 
-            <IndexOfLastRecords />
+            <SelectFilterRecordsProvider>
+              <LatestRecords />
+            </SelectFilterRecordsProvider>
 
-            <RankingRecords />
+            <SelectFilterRecordsProvider>
+              <IndexOfLastRecords />
+            </SelectFilterRecordsProvider>
+
+            <SelectFilterRecordsProvider>
+              <RankingRecords />
+            </SelectFilterRecordsProvider>
 
             <Box className="sm:col-span-6 md:col-span-3 max-md:order-4">
-              <h1 className="text-left mb-8 mt-5">Registros futuros</h1>
+              <h1 className="max-[520px]:text-center min-[520px]:text-left mb-8 mt-5">
+                Registros futuros
+              </h1>
               <div className="relative overflow-x-auto">
                 <TableRecords
                   period="future"

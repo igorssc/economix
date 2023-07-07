@@ -1,10 +1,10 @@
 import { SelectFilterRecordsContext } from "@/contexts/selectFilterRecordsContext";
 import { useContext } from "react";
 import { Box } from "./Box";
+import { DayByTimeChartChart } from "./DayByTimeChartChart";
 import { Select } from "./Select";
-import { TableRecords } from "./TableRecords";
 
-export function LatestRecords() {
+export function RecordDayTime() {
   const {
     periodDays,
     periodMonth,
@@ -16,11 +16,11 @@ export function LatestRecords() {
   } = useContext(SelectFilterRecordsContext);
 
   return (
-    <Box className="sm:col-span-6 md:col-span-3 md:row-span-6 max-md:order-2">
-      <div className="flex items-center justify-center mb-4 max-[520px]:flex-col md:max-lg:flex-col">
-        <h1 className="text-center">Útimos registros</h1>
+    <Box className="col-span-6">
+      <div className="flex items-center justify-center mb-4 relative min-[870px]:mt-4 max-[530px]:flex-col">
+        <h1 className="text-center">Registros - Dia x Hora</h1>
 
-        <div className="min-[520px]:max-md:ml-auto lg:ml-auto max-[520px]:mt-4 md:max-lg:mt-4">
+        <div className="min-[870px]:absolute min-[870px]:top-1/2 min-[870px]:-translate-y-1/2 min-[870px]:right-0 min-[530px]:ml-auto max-[530px]:mt-4">
           <Select
             label="Período"
             value={periodMonth}
@@ -36,7 +36,7 @@ export function LatestRecords() {
         </div>
       </div>
       <div className="relative overflow-x-auto">
-        <TableRecords hide={["description"]} limit={15} recordsInit={records} />
+        <DayByTimeChartChart records={records} period={periodMonth} />
       </div>
     </Box>
   );

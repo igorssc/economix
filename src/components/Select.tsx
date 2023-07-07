@@ -6,9 +6,9 @@ import { Dispatch, SetStateAction } from "react";
 
 interface SelectProps {
   label: string;
-  value: string;
-  setValue: Dispatch<SetStateAction<string>>;
-  options: string[];
+  value: number;
+  setValue: Dispatch<SetStateAction<number>>;
+  options: { value: number; label: string }[];
 }
 
 export function Select({ label, value, setValue, options }: SelectProps) {
@@ -19,11 +19,11 @@ export function Select({ label, value, setValue, options }: SelectProps) {
         id="demo-select-small"
         value={value}
         label={label}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => setValue(+e.target.value)}
       >
         {options.map((option, index) => (
-          <MenuItem value={option} key={index}>
-            {option}
+          <MenuItem value={option.value} key={index}>
+            {option.label}
           </MenuItem>
         ))}
       </SelectMui>

@@ -1,5 +1,6 @@
 import { RecordContext, RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
+import { getWeekday } from "@/utils/getWeekday";
 import { differenceInDays, subMonths } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { twMerge } from "tailwind-merge";
 
 interface MonthlyChartProps {
   recordsInit?: RecordType[] | null;
@@ -104,8 +106,27 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recordsDisplayed]);
 
-  const formatXAxisTick = (value: string, _index: number) => {
-    return value;
+  const customXTick = (props: any) => {
+    const { x, y, payload } = props;
+
+    const prevValue = payload.value;
+
+    const weekday = getWeekday(prevValue);
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="end"
+          fill={weekday === 6 || weekday === 0 ? "rgb(126, 34, 206)" : "#000"}
+          className="text-[0.6rem] font-bold"
+        >
+          {prevValue}
+        </text>
+      </g>
+    );
   };
 
   const formatYAxisTick = (value: number, index: number) => {
@@ -118,9 +139,20 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
   const renderTooltipContent = (data: any) => {
     if (data.payload && data.payload.length > 0) {
       const { name, value1, value2 } = data.payload[0].payload;
+
+      const weekday = getWeekday(name);
+
       return (
         <div className="text-xs">
-          {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
+          <span
+            className={twMerge(
+              "font-bold",
+              (weekday === 6 || weekday === 0) &&
+                (value1 >= value2 ? "text-purple-700" : "text-red-700")
+            )}
+          >
+            {name}
+          </span>
           <br />
           R$ {value1.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
           (Receitas)
@@ -139,13 +171,9 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
         <XAxis
           dataKey="name"
           axisLine={{ display: "none" }}
-          tick={{
-            fill: theme === "dark" ? "#d1d5db" : "#000",
-            fontSize: "0.6rem",
-          }}
+          tick={customXTick}
           tickLine={{ display: "none" }}
           interval="equidistantPreserveStart"
-          tickFormatter={formatXAxisTick}
         />
         <YAxis
           tick={{

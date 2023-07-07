@@ -1,5 +1,5 @@
-import { RecordContext, RecordType } from "@/contexts/recordContext";
-import { filterRecordsBasedOnPeriod } from "@/utils/filterRecordsBasedOnPeriod";
+import { RecordType } from "@/contexts/recordContext";
+import { SelectFilterRecordsContext } from "@/contexts/selectFilterRecordsContext";
 import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import onlineShoppingImg from "../assets/online-shopping.webp";
@@ -7,8 +7,15 @@ import { Box } from "./Box";
 import { Select } from "./Select";
 
 export function BiggestExpenseOfTheMonth() {
-  const { allRecordsFrom30DaysAgo, allRecordsFromMonthsAgoByCategory } =
-    useContext(RecordContext);
+  const {
+    periodDays,
+    periodMonth,
+    records,
+    setPeriodDays,
+    setPeriodMonths,
+    selectPeriodDaysOptions,
+    selectPeriodMonthsOptions,
+  } = useContext(SelectFilterRecordsContext);
 
   const [highestExpense, setHighestExpense] = useState(
     {} as {
@@ -17,9 +24,6 @@ export function BiggestExpenseOfTheMonth() {
       totalAmount: number;
     }
   );
-
-  const [period, setPeriod] = useState("1 mês");
-  const [recordsBase, setRecordsBase] = useState<RecordType[]>([]);
 
   const processRecords = async (records: RecordType[]) => {
     const biggestExpense: {
@@ -68,51 +72,23 @@ export function BiggestExpenseOfTheMonth() {
   };
 
   useEffect(() => {
-    setRecordsBase(allRecordsFrom30DaysAgo);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    setRecordsBase(
-      filterRecordsBasedOnPeriod({
-        records: [
-          ...allRecordsFromMonthsAgoByCategory.expenditures,
-          ...allRecordsFromMonthsAgoByCategory.revenues,
-        ],
-        period: +period.split(" ")[0],
-        unit: "month",
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period, allRecordsFromMonthsAgoByCategory]);
-
-  const selectOptions = [
-    "1 mês",
-    "2 meses",
-    "3 meses",
-    "4 meses",
-    "5 meses",
-    "6 meses",
-    "7 meses",
-    "8 meses",
-    "9 meses",
-    "10 meses",
-    "11 meses",
-    "12 meses",
-  ];
-
-  useEffect(() => {
-    processRecords(recordsBase);
-  }, [recordsBase]);
+    processRecords(records);
+  }, [records]);
 
   return (
-    <Box className="flex flex-col gap-4 items-center justify-center sm:col-span-6 md:col-span-2">
-      <div className="">
+    <Box className="flex flex-col gap-4 items-center justify-center col-span-6 lg:col-span-2">
+      <div className="flex items-center justify-center max-[320px]:flex-col">
         <Select
           label="Período"
-          value={period}
-          setValue={setPeriod}
-          options={selectOptions}
+          value={periodMonth}
+          setValue={setPeriodMonths}
+          options={selectPeriodMonthsOptions}
+        />
+        <Select
+          label="Dias"
+          value={periodDays}
+          setValue={setPeriodDays}
+          options={selectPeriodDaysOptions}
         />
       </div>
       <Image
@@ -129,7 +105,7 @@ export function BiggestExpenseOfTheMonth() {
       </h1>
       <p className="text-center">
         Foi o gasto que você mais teve nos últimos{" "}
-        {period === "1 mês" ? "30 dias" : period},{" "}
+        {periodMonth === 1 ? "30 dias" : "1 mês"},{" "}
         {highestExpense?.quantity || 0} vez
         {highestExpense?.quantity > 1 ? "es" : ""}, totalizando{" "}
         {highestExpense?.totalAmount?.toLocaleString("pt-br", {
