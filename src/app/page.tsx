@@ -121,7 +121,7 @@ export default function Dashboard() {
             </SelectFilterRecordsProvider>
 
             <Box className="sm:col-span-6 md:col-span-3 max-md:order-4">
-              <h1 className="max-[520px]:text-center min-[520px]:text-left mb-8 mt-5">
+              <h1 className="mb-5 max-[520px]:text-center md:max-lg:text-center min-[520px]:max-md:mb-8 lg:mb-8 min-[520px]:max-md:mt-5 lg:mt-5">
                 Registros futuros
               </h1>
               <div className="relative overflow-x-auto">
