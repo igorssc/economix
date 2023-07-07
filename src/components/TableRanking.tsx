@@ -92,7 +92,7 @@ export function TableRanking({
         },
         { label: "Total", name: "totalAmount", isActiveSort: true },
       ]}
-      sortingBaseDefault={{ by: "total", order: "DESC" }}
+      sortingBaseDefault={{ by: "totalAmount", order: "DESC" }}
     />
   );
 }
