@@ -76,8 +76,6 @@ export function DayByTimeChartChart({
   const customXTick = (props: any) => {
     const { x, y, payload } = props;
 
-    console.log(payload);
-
     const prevValue = new Date(
       new Date().setDate(new Date().getDate() - payload.value)
     ).toLocaleDateString("pt-br", { day: "2-digit", month: "2-digit" });

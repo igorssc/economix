@@ -1,5 +1,6 @@
 "use client";
 import { Box } from "@/components/Box";
+import { Footer } from "@/components/Footer";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -66,6 +67,8 @@ export default function Login() {
           </div>
         </Box>
       </div>
+
+      <Footer />
     </>
   );
 }

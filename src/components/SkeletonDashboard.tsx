@@ -33,13 +33,13 @@ export function SkeletonDashboard() {
           </div>
         </div>
         <Skeleton variant="rectangular" className="w-full !h-80" />
-        <div className="w-full gap-4 grid grid-cols-3">
+        <div className="w-full gap-4 grid grid-cols-3 max-md:hidden">
           <Skeleton variant="rectangular" className="w-full !h-80" />
           <Skeleton variant="rectangular" className="w-full !h-80" />
           <Skeleton variant="rectangular" className="w-full !h-80" />
         </div>
         <Skeleton variant="rectangular" className="w-full !h-80" />
-        <div className="w-full gap-4 grid grid-cols-2">
+        <div className="w-full gap-4 grid grid-cols-2 max-md:hidden">
           <Skeleton variant="rectangular" className="w-full !h-80" />
           <Skeleton variant="rectangular" className="w-full !h-80" />
         </div>

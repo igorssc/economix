@@ -5,6 +5,7 @@ import { BiggestExpenseOfTheMonth } from "@/components/BiggestExpenseOfTheMonth"
 import { Box } from "@/components/Box";
 import { Button } from "@/components/Button";
 import { ExpenseChart } from "@/components/ExpenseChart";
+import { Footer } from "@/components/Footer";
 import { IndexOfLastRecords } from "@/components/IndexOfLastRecords";
 import { LatestRecords } from "@/components/LatestRecords";
 import { MonthlyProfitChart } from "@/components/MonthlyProfitChart";
@@ -12,6 +13,7 @@ import { Nav } from "@/components/Nav";
 import { NewRegisterButton } from "@/components/NewRegisterButton";
 import { RankingRecords } from "@/components/RankingRecords";
 import { RecordDayTime } from "@/components/RecordDayTime";
+import { ScrollTopButton } from "@/components/ScrollTopButton";
 import { SkeletonDashboard } from "@/components/SkeletonDashboard";
 import { SummarizedMonthlyExpensesIndex } from "@/components/SummarizedMonthlyExpensesIndex";
 import { TableRecords } from "@/components/TableRecords";
@@ -82,6 +84,7 @@ export default function Dashboard() {
       <SnackbarProvider maxSnack={3}>
         <Nav />
         <NewRegisterButton onClick={() => setIsOpenCreateRecordDialog(true)} />
+        <ScrollTopButton />
 
         <main className="max-w-[1280px] p-4 m-auto">
           <SummarizedMonthlyExpensesIndex />
@@ -132,6 +135,8 @@ export default function Dashboard() {
           </div>
         </main>
       </SnackbarProvider>
+
+      <Footer />
     </>
   );
 }
