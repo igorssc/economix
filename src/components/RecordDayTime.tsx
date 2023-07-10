@@ -41,14 +41,14 @@ export function RecordDayTime() {
             value={periodMonths}
             setValue={setPeriodMonths}
             options={selectPeriodMonthsOptions}
-            className="my-2 mr-2"
+            className="!my-2 !mr-2"
           />
           <Select
             label="Dias"
             value={periodDays}
             setValue={setPeriodDays}
             options={selectPeriodDaysOptions}
-            className="my-2 ml-2"
+            className="!my-2 !ml-2"
           />
         </div>
       </div>
