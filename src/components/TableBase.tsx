@@ -1,4 +1,4 @@
-import { Plus } from "@phosphor-icons/react";
+import { Minus, Plus } from "@phosphor-icons/react";
 import { TdHTMLAttributes, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Button } from "./Button";
@@ -157,19 +157,34 @@ export function TableBase({
           ))}
         </Table.Body>
       </Table.Root>
-      <Button
-        scheme="tertiary"
-        isSmall
-        className={twMerge(
-          "gap-2 mt-3 py-2 w-48 max-w-full text-xs font-bold uppercase leading-relaxed [&_.icon]:text-sm",
-          currentLimit && currentLimit >= dataDisplayed.length && "hidden",
-          !currentLimit && "hidden"
-        )}
-        onClick={() => setCurrentLimit((prev) => (prev || 0) + (limit || 0))}
-      >
-        <Plus weight="bold" className="icon" />
-        Exibir mais
-      </Button>
+      <div className="flex gap-6 justify-center mt-3">
+        <Button
+          scheme="tertiary"
+          isSmall
+          className={twMerge(
+            "gap-2 flex py-2 text-xs font-bold uppercase leading-relaxed [&_.icon]:text-sm !w-auto max-w-none m-0",
+            currentLimit && currentLimit <= (limit || 0) && "hidden",
+            !currentLimit && "hidden"
+          )}
+          onClick={() => setCurrentLimit((prev) => (prev || 0) - (limit || 0))}
+        >
+          <Minus weight="bold" className="icon" />
+          Exibir menos
+        </Button>
+        <Button
+          scheme="tertiary"
+          isSmall
+          className={twMerge(
+            "gap-2 flex py-2 text-xs font-bold uppercase leading-relaxed [&_.icon]:text-sm !w-auto max-w-none m-0",
+            currentLimit && currentLimit >= dataDisplayed.length && "hidden",
+            !currentLimit && "hidden"
+          )}
+          onClick={() => setCurrentLimit((prev) => (prev || 0) + (limit || 0))}
+        >
+          <Plus weight="bold" className="icon" />
+          Exibir mais
+        </Button>
+      </div>
     </>
   );
 }

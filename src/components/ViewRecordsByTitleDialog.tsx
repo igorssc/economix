@@ -5,7 +5,8 @@ import { generateMaskCategory } from "@/utils/generateMaskCategory";
 import DialogMui from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { X } from "@phosphor-icons/react";
+import { ArrowsLeftRight, X } from "@phosphor-icons/react";
+import { parseISO } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import { DetailsByTitleChart } from "./DetailsByTitleChart";
 import { TableRecords } from "./TableRecords";
@@ -19,36 +20,80 @@ export function ViewRecordsByTitleDialog() {
 
   const { allRecordsFromMonthsAgoByCategory } = useContext(RecordContext);
 
-  const [data, setData] = useState<RecordType[]>([]);
+  const [dataTable, setDataTable] = useState<RecordType[]>([]);
+  const [dataChart, setDataChart] = useState<
+    { category: string; totalAmount: number; date: string }[]
+  >([]);
+
+  const [filterRecords, setFilterRecords] = useState("daily");
+
+  const groupDataByMonth = (data: RecordType[]) => {
+    const groupedData = [] as {
+      category: string;
+      totalAmount: number;
+      date: string;
+    }[];
+
+    if (filterRecords === "daily") {
+      data.forEach((value) => {
+        groupedData.push({
+          category: value.category,
+          totalAmount: value.amount,
+          date: value.date,
+        });
+      });
+    } else {
+      data.forEach((value) => {
+        const indexMonth = groupedData.findIndex(
+          (f) => f.date === value.date.substr(0, 7)
+        );
+
+        if (indexMonth >= 0) {
+          groupedData[indexMonth].totalAmount += value.amount;
+        } else {
+          groupedData.push({
+            category: value.category,
+            totalAmount: value.amount,
+            date: parseISO(`${value.date.substr(0, 7)}-01`).toISOString(),
+          });
+        }
+      });
+    }
+
+    return groupedData;
+  };
 
   useEffect(() => {
-    setData(() =>
-      filterRecordsBasedOnPeriod({
-        records: [
-          ...allRecordsFromMonthsAgoByCategory.expenditures.filter((f) =>
-            titleSelected.periodDays === -1
-              ? f
-              : new Date(f.date).getDay() === titleSelected.periodDays
-          ),
-          ...allRecordsFromMonthsAgoByCategory.revenues.filter((f) =>
-            titleSelected.periodDays === -1
-              ? f
-              : new Date(f.date).getDay() === titleSelected.periodDays
-          ),
-        ],
-        period: titleSelected.periodMonths,
-        unit: "month",
-      }).filter(
-        (value) =>
-          value.category === titleSelected.category &&
-          value.title === titleSelected.title
-      )
+    const prevValue = filterRecordsBasedOnPeriod({
+      records: [
+        ...allRecordsFromMonthsAgoByCategory.expenditures.filter((f) =>
+          titleSelected.periodDays === -1
+            ? f
+            : new Date(f.date).getDay() === titleSelected.periodDays
+        ),
+        ...allRecordsFromMonthsAgoByCategory.revenues.filter((f) =>
+          titleSelected.periodDays === -1
+            ? f
+            : new Date(f.date).getDay() === titleSelected.periodDays
+        ),
+      ],
+      period: titleSelected.periodMonths,
+      unit: "month",
+    }).filter(
+      (value) =>
+        value.category === titleSelected.category &&
+        value.title === titleSelected.title
     );
+
+    setDataTable(prevValue);
+
+    setDataChart(groupDataByMonth(prevValue));
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRecordsFromMonthsAgoByCategory, titleSelected]);
+  }, [allRecordsFromMonthsAgoByCategory, titleSelected, filterRecords]);
 
   const handleClose = () => {
-    setData([]);
+    setDataTable([]);
 
     setOpen(false);
   };
@@ -74,15 +119,30 @@ export function ViewRecordsByTitleDialog() {
           </div>
         </DialogTitle>
         <DialogContent className="flex flex-col gap-3 overflow-y-visible">
+          <div className="flex text-purple-700 text-sm mb-6 justify-start">
+            <div
+              className="flex gap-2 cursor-pointer items-center"
+              onClick={() =>
+                setFilterRecords((prev) =>
+                  prev === "daily" ? "monthly" : "daily"
+                )
+              }
+            >
+              <ArrowsLeftRight weight="light" className="text-lg" />
+              {filterRecords === "daily" && "Diário"}
+              {filterRecords === "monthly" && "Mensal"}
+            </div>
+          </div>
           <DetailsByTitleChart
-            records={data}
+            records={dataChart}
             {...(titleSelected.category === "expenditure" && {
               scheme: "secondary",
             })}
             period={titleSelected.periodMonths}
+            filter={filterRecords}
           />
           <TableRecords
-            recordsInit={data}
+            recordsInit={dataTable}
             hide={["title", "category"]}
             scheme="secondary"
           />

@@ -35,6 +35,8 @@ export function DayByTimeChartChart({
 
   const [dataRevenues, setDataRevenues] = useState([] as DataType[]);
 
+  const [dataEmpty, setDataEmpty] = useState([] as { x: number; y: number }[]);
+
   useEffect(() => {
     const revenuesPrev = [] as DataType[];
     const expendituresPrev = [] as DataType[];
@@ -63,8 +65,25 @@ export function DayByTimeChartChart({
       }
     });
 
+    const distance = differenceInCalendarDays(
+      new Date(),
+      new Date(new Date().setMonth(new Date().getMonth() - (period || 1)))
+    );
+
+    const emptyPrev = Array.from({ length: distance }, (_, i) => ({
+      x: 0 + i,
+      y: 0,
+      type: "empty",
+    }));
+
+    console.log(emptyPrev);
+
+    setDataEmpty(emptyPrev);
+
     setDataExpenditures(expendituresPrev);
     setDataRevenues(revenuesPrev);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records]);
 
   const formatYAxisTick = (value: any, index: number) => {
@@ -110,7 +129,7 @@ export function DayByTimeChartChart({
 
   const renderTooltipContent = (data: any) => {
     if (data.payload && data.payload.length > 0) {
-      const { x, y } = data.payload[0].payload;
+      const { x, y, type } = data.payload[0].payload;
 
       const prevValue = new Date(new Date().setDate(new Date().getDate() - x));
 
@@ -120,6 +139,10 @@ export function DayByTimeChartChart({
       const formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
         .slice(1)
         .replace("-", " ")}`;
+
+      if (type === "empty") {
+        return null;
+      }
 
       return (
         <div className="text-xs">
@@ -182,6 +205,7 @@ export function DayByTimeChartChart({
           data={dataRevenues}
           fill={theme === "dark" ? "rgb(107,33,168)" : "rgb(126, 34, 206)"}
         />
+        <Scatter data={dataEmpty} fill={"transparent"} />
         <Scatter
           data={dataExpenditures}
           fill={theme === "dark" ? "rgba(174, 4, 4,0.5)" : "rgb(174, 4, 4)"}

@@ -1,7 +1,12 @@
-import { RecordType } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
 import { getWeekday } from "@/utils/getWeekday";
-import { differenceInDays, format, parse, subMonths } from "date-fns";
+import {
+  differenceInCalendarMonths,
+  differenceInDays,
+  format,
+  parse,
+  subMonths,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -15,15 +20,21 @@ import {
 import { twMerge } from "tailwind-merge";
 
 interface DetailsByTitleChartProps {
-  records: RecordType[];
+  records: {
+    category: string;
+    totalAmount: number;
+    date: string;
+  }[];
   scheme?: "primary" | "secondary";
   period?: number;
+  filter?: string;
 }
 
 export function DetailsByTitleChart({
   records,
   scheme = "primary",
   period,
+  filter,
 }: DetailsByTitleChartProps) {
   const { theme } = useContext(ThemeContext);
 
@@ -37,45 +48,85 @@ export function DetailsByTitleChart({
   const id = `chart-${(Math.random() * 1000000).toFixed(0)}`;
 
   useEffect(() => {
-    setData(
-      Array.from(
-        {
-          length: period
-            ? period === 1
-              ? 30
-              : differenceInDays(
+    if (filter === "daily") {
+      setData(
+        Array.from(
+          {
+            length: period
+              ? period === 1
+                ? 30
+                : differenceInDays(
+                    new Date(),
+                    new Date(
+                      subMonths(new Date(), period).setDate(
+                        new Date().getDate()
+                      )
+                    )
+                  )
+              : 30,
+          },
+          (_, i) => {
+            return {
+              date: new Date(
+                new Date().setDate(new Date().getDate() - i)
+              ).toLocaleDateString("pt-br", {
+                month: "2-digit",
+                day: "2-digit",
+              }),
+              value: records
+                .filter(
+                  (v) =>
+                    new Date(v.date).getDate() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getDate() &&
+                    new Date(v.date).getMonth() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getMonth()
+                )
+                .reduce((acc, v) => (acc += v.totalAmount), 0),
+            };
+          }
+        ).reverse()
+      );
+    } else {
+      setData(() => {
+        return Array.from(
+          {
+            length: period
+              ? differenceInCalendarMonths(
                   new Date(),
                   new Date(
-                    subMonths(new Date(), period).setDate(new Date().getDate())
+                    subMonths(new Date(), period + 1).setDate(
+                      new Date().getDate()
+                    )
                   )
                 )
-            : 30,
-        },
-        (_, i) => {
-          return {
-            date: new Date(
-              new Date().setDate(new Date().getDate() - i)
-            ).toLocaleDateString("pt-br", {
-              month: "2-digit",
-              day: "2-digit",
-            }),
-            value: records
-              .filter(
-                (v) =>
-                  new Date(v.date).getDate() ===
+              : 1,
+          },
+          (_, i) => {
+            return {
+              date: new Date(
+                new Date().setMonth(new Date().getMonth() - i)
+              ).toLocaleDateString("pt-br", {
+                month: "2-digit",
+                year: "numeric",
+              }),
+              value: records
+                .filter(
+                  (v) =>
+                    new Date(v.date).getMonth() ===
                     new Date(
-                      new Date().setDate(new Date().getDate() - i)
-                    ).getDate() &&
-                  new Date(v.date).getMonth() ===
-                    new Date(
-                      new Date().setDate(new Date().getDate() - i)
+                      new Date().setMonth(new Date().getMonth() - i)
                     ).getMonth()
-              )
-              .reduce((acc, v) => (acc += v.amount), 0),
-          };
-        }
-      ).reverse()
-    );
+                )
+                .reduce((acc, v) => (acc += v.totalAmount), 0),
+            };
+          }
+        ).reverse();
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records]);
 
@@ -95,14 +146,16 @@ export function DetailsByTitleChart({
           textAnchor="end"
           fill={
             weekday === 6 || weekday === 0
-              ? scheme === "primary"
+              ? scheme === "primary" && filter === "daily"
                 ? "rgb(126, 34, 206)"
                 : "rgb(159, 2, 2)"
               : "#000"
           }
           className={twMerge(
             "text-[0.6rem]",
-            (weekday === 6 || weekday === 0) && "font-bold"
+            (weekday === 6 || weekday === 0) &&
+              filter === "daily" &&
+              "font-bold"
           )}
         >
           {prevValue}
@@ -124,15 +177,30 @@ export function DetailsByTitleChart({
 
       const weekday = getWeekday(date);
 
-      const dayOfWeek = format(
-        parse(date, "dd/MM", new Date()),
-        "EEEE, dd 'de' MMMM",
-        { locale: ptBR }
-      );
+      let formattedDate = "";
 
-      const formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
-        .slice(1)
-        .replace("-", " ")}`;
+      if (filter === "daily") {
+        const dayOfWeek = format(
+          parse(date, "dd/MM", new Date()),
+          "EEEE, dd 'de' MMMM",
+          { locale: ptBR }
+        );
+
+        formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
+          .slice(1)
+          .replace("-", " ")}`;
+      } else {
+        formattedDate = format(
+          parse(date, "MM/yyyy", new Date()),
+          "MMMM 'de' yyyy",
+          {
+            locale: ptBR,
+          }
+        );
+
+        formattedDate =
+          formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+      }
 
       return (
         <div className="text-xs">

@@ -71,10 +71,7 @@ export function TableRanking({
           quantity: data.quantity,
           totalAmount: {
             type: "currency",
-            value: data.totalAmount?.toLocaleString("pt-br", {
-              style: "currency",
-              currency: "BRL",
-            }),
+            value: data.totalAmount,
           },
         },
       }))}

@@ -9,11 +9,18 @@ interface SelectProps {
   value: number;
   setValue: Dispatch<SetStateAction<number>>;
   options: { value: number; label: string }[];
+  className?: string;
 }
 
-export function Select({ label, value, setValue, options }: SelectProps) {
+export function Select({
+  label,
+  value,
+  setValue,
+  options,
+  className,
+}: SelectProps) {
   return (
-    <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+    <FormControl sx={{ minWidth: 120 }} size="small" className={className}>
       <InputLabel className="dark:text-gray-300">{label}</InputLabel>
       <SelectMui
         id="demo-select-small"
