@@ -391,7 +391,7 @@ export function RecordProvider({ children }: RecordProviderProps) {
               .slice(0, 10)
           );
         }
-      }, 1000 * (i + 1));
+      }, 1500 + i * 1000);
     });
   }
 
