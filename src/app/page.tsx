@@ -96,11 +96,13 @@ export default function Dashboard() {
             </SelectFilterRecordsProvider>
 
             <Box className="sm:col-span-3 md:col-span-3 lg:col-span-2">
-              <h1 className="text-center">Quantidade de gastos mensais</h1>
+              <h1 className="text-center mb-8 lg:mt-3">
+                Quantidade de gastos mensais
+              </h1>
               <ExpenseChart />
             </Box>
             <Box className="sm:col-span-3 md:col-span-3 lg:col-span-2">
-              <h1 className="text-center">Lucro mensal</h1>
+              <h1 className="text-center mb-8 lg:mt-3">Lucro mensal</h1>
               <MonthlyProfitChart />
             </Box>
 
@@ -121,7 +123,7 @@ export default function Dashboard() {
             </SelectFilterRecordsProvider>
 
             <Box className="sm:col-span-6 md:col-span-3 max-md:order-4">
-              <h1 className="mb-5 max-[520px]:text-center md:max-lg:text-center min-[520px]:max-md:mb-8 lg:mb-8 min-[520px]:max-md:mt-5 lg:mt-5">
+              <h1 className="mb-8 max-[520px]:text-center md:max-lg:text-center min-[520px]:max-md:mb-8 lg:mb-8 min-[520px]:max-md:mt-5 lg:mt-5">
                 Registros futuros
               </h1>
               <div className="relative overflow-x-auto">

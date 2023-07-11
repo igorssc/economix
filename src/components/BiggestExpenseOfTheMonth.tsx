@@ -77,7 +77,7 @@ export function BiggestExpenseOfTheMonth() {
 
   return (
     <Box className="flex flex-col gap-4 items-center justify-center col-span-6 lg:col-span-2">
-      <div className="flex items-center justify-center max-[320px]:flex-col">
+      <div className="flex items-center justify-center max-[320px]:flex-col mb-4">
         <Select
           label="Período"
           value={periodMonths}
