@@ -117,9 +117,13 @@ export function DetailsByTitleChart({
                 .filter(
                   (v) =>
                     new Date(v.date).getMonth() ===
-                    new Date(
-                      new Date().setMonth(new Date().getMonth() - i)
-                    ).getMonth()
+                      new Date(
+                        new Date().setMonth(new Date().getMonth() - i)
+                      ).getMonth() &&
+                    new Date(v.date).getFullYear() ===
+                      new Date(
+                        new Date().setMonth(new Date().getMonth() - i)
+                      ).getFullYear()
                 )
                 .reduce((acc, v) => (acc += v.totalAmount), 0),
             };

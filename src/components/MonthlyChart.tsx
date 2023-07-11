@@ -126,7 +126,11 @@ export function MonthlyChart({
                     new Date(v.date).getMonth() ===
                       new Date(
                         new Date().setDate(new Date().getDate() - i)
-                      ).getMonth()
+                      ).getMonth() &&
+                    new Date(v.date).getFullYear() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getFullYear()
                 )
                 .reduce((acc, v) => (acc += v.totalAmount), 0),
               value2: recordsDisplayed
@@ -140,7 +144,11 @@ export function MonthlyChart({
                     new Date(v.date).getMonth() ===
                       new Date(
                         new Date().setDate(new Date().getDate() - i)
-                      ).getMonth()
+                      ).getMonth() &&
+                    new Date(v.date).getFullYear() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getFullYear()
                 )
                 .reduce((acc, v) => (acc += v.totalAmount), 0),
             };
@@ -175,9 +183,13 @@ export function MonthlyChart({
                 .filter(
                   (v) =>
                     new Date(v.date).getMonth() ===
-                    new Date(
-                      new Date().setMonth(new Date().getMonth() - i)
-                    ).getMonth()
+                      new Date(
+                        new Date().setMonth(new Date().getMonth() - i)
+                      ).getMonth() &&
+                    new Date(v.date).getFullYear() ===
+                      new Date(
+                        new Date().setMonth(new Date().getMonth() - i)
+                      ).getFullYear()
                 )
                 .reduce((acc, v) => (acc += v.totalAmount), 0),
               value2: recordsDisplayed
@@ -185,9 +197,13 @@ export function MonthlyChart({
                 .filter(
                   (v) =>
                     new Date(v.date).getMonth() ===
-                    new Date(
-                      new Date().setMonth(new Date().getMonth() - i)
-                    ).getMonth()
+                      new Date(
+                        new Date().setMonth(new Date().getMonth() - i)
+                      ).getMonth() &&
+                    new Date(v.date).getFullYear() ===
+                      new Date(
+                        new Date().setMonth(new Date().getMonth() - i)
+                      ).getFullYear()
                 )
                 .reduce((acc, v) => (acc += v.totalAmount), 0),
             };

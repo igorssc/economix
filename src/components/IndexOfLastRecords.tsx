@@ -1,5 +1,6 @@
 import { SelectFilterRecordsContext } from "@/contexts/selectFilterRecordsContext";
 import { ArrowsLeftRight } from "@phosphor-icons/react";
+import { parseISO } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import { Box } from "./Box";
 import { MonthlyChart } from "./MonthlyChart";
@@ -27,20 +28,64 @@ export function IndexOfLastRecords() {
     }[]
   >([]);
 
-  useEffect(() => {
-    setDataDisplayed(
-      records
-        .filter((value) =>
-          filterRecordsCategory === "all"
-            ? true
-            : value.category + "s" === filterRecordsCategory
-        )
-        .map((value) => ({
+  const groupDataByMonth = (
+    data: {
+      category: string;
+      totalAmount: number;
+      date: string;
+    }[]
+  ) => {
+    const groupedData = [] as {
+      category: string;
+      totalAmount: number;
+      date: string;
+    }[];
+
+    if (filterRecordsTime === "daily") {
+      data.forEach((value) => {
+        groupedData.push({
           category: value.category,
-          totalAmount: value.amount,
+          totalAmount: value.totalAmount,
           date: value.date,
-        }))
-    );
+        });
+      });
+    } else {
+      data.forEach((value) => {
+        const indexMonth = groupedData.findIndex(
+          (f) => f.date === value.date.substr(0, 7)
+        );
+
+        if (indexMonth >= 0) {
+          groupedData[indexMonth].totalAmount += value.totalAmount;
+        } else {
+          groupedData.push({
+            category: value.category,
+            totalAmount: value.totalAmount,
+            date: parseISO(`${value.date.substr(0, 7)}-01`).toISOString(),
+          });
+        }
+      });
+    }
+
+    return groupedData;
+  };
+
+  useEffect(() => {
+    const prevValue = records
+      .filter((value) =>
+        filterRecordsCategory === "all"
+          ? true
+          : value.category + "s" === filterRecordsCategory
+      )
+      .map((value) => ({
+        category: value.category,
+        totalAmount: value.amount,
+        date: value.date,
+      }));
+
+    console.log(groupDataByMonth(prevValue));
+
+    setDataDisplayed(groupDataByMonth(prevValue));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records, filterRecordsCategory, filterRecordsTime]);
 
