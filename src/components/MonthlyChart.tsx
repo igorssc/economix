@@ -1,7 +1,13 @@
-import { RecordContext, RecordType } from "@/contexts/recordContext";
+import { RecordContext } from "@/contexts/recordContext";
 import { ThemeContext } from "@/contexts/themeContext";
 import { getWeekday } from "@/utils/getWeekday";
-import { differenceInDays, format, parse, subMonths } from "date-fns";
+import {
+  differenceInCalendarMonths,
+  differenceInDays,
+  format,
+  parse,
+  subMonths,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -15,11 +21,24 @@ import {
 import { twMerge } from "tailwind-merge";
 
 interface MonthlyChartProps {
-  recordsInit?: RecordType[] | null;
+  recordsInit?:
+    | {
+        category: string;
+        totalAmount: number;
+        date: string;
+      }[]
+    | null;
   period?: number;
+  filterTime?: string;
+  filterCategory?: string;
 }
 
-export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
+export function MonthlyChart({
+  recordsInit,
+  period,
+  filterTime,
+  filterCategory,
+}: MonthlyChartProps) {
   const { allRecordsFrom30DaysAgo } = useContext(RecordContext);
   const { theme } = useContext(ThemeContext);
 
@@ -31,20 +50,38 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
     }[]
   );
 
-  const [recordsDisplayed, setRecordsDisplayed] = useState<RecordType[]>([]);
+  const [recordsDisplayed, setRecordsDisplayed] = useState<
+    {
+      category: string;
+      totalAmount: number;
+      date: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     if (recordsInit) {
       setRecordsDisplayed(recordsInit);
     } else {
-      setRecordsDisplayed(allRecordsFrom30DaysAgo);
+      setRecordsDisplayed(
+        allRecordsFrom30DaysAgo.map((value) => ({
+          category: value.category,
+          totalAmount: value.amount,
+          date: value.date,
+        }))
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!recordsInit) {
-      setRecordsDisplayed(allRecordsFrom30DaysAgo);
+      setRecordsDisplayed(
+        allRecordsFrom30DaysAgo.map((value) => ({
+          category: value.category,
+          totalAmount: value.amount,
+          date: value.date,
+        }))
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allRecordsFrom30DaysAgo]);
@@ -54,59 +91,111 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
   }, [recordsInit]);
 
   useEffect(() => {
-    setData(
-      Array.from(
-        {
-          length:
-            recordsInit && period
-              ? differenceInDays(
+    if (filterTime === "daily") {
+      setData(
+        Array.from(
+          {
+            length:
+              recordsInit && period
+                ? differenceInDays(
+                    new Date(),
+                    new Date(
+                      subMonths(new Date(), period).setDate(
+                        new Date().getDate()
+                      )
+                    )
+                  )
+                : 30,
+          },
+          (_, i) => {
+            return {
+              date: new Date(
+                new Date().setDate(new Date().getDate() - i)
+              ).toLocaleDateString("pt-br", {
+                month: "2-digit",
+                day: "2-digit",
+              }),
+              value1: recordsDisplayed
+                .filter((v) => v.category === "revenue")
+                .filter(
+                  (v) =>
+                    new Date(v.date).getDate() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getDate() &&
+                    new Date(v.date).getMonth() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getMonth()
+                )
+                .reduce((acc, v) => (acc += v.totalAmount), 0),
+              value2: recordsDisplayed
+                .filter((v) => v.category === "expenditure")
+                .filter(
+                  (v) =>
+                    new Date(v.date).getDate() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getDate() &&
+                    new Date(v.date).getMonth() ===
+                      new Date(
+                        new Date().setDate(new Date().getDate() - i)
+                      ).getMonth()
+                )
+                .reduce((acc, v) => (acc += v.totalAmount), 0),
+            };
+          }
+        ).reverse()
+      );
+    } else {
+      setData(() => {
+        return Array.from(
+          {
+            length: period
+              ? differenceInCalendarMonths(
                   new Date(),
                   new Date(
-                    subMonths(new Date(), period).setDate(new Date().getDate())
+                    subMonths(new Date(), period + 1).setDate(
+                      new Date().getDate()
+                    )
                   )
                 )
-              : 30,
-        },
-        (_, i) => {
-          return {
-            date: new Date(
-              new Date().setDate(new Date().getDate() - i)
-            ).toLocaleDateString("pt-br", {
-              month: "2-digit",
-              day: "2-digit",
-            }),
-            value1: recordsDisplayed
-              .filter((v) => v.category === "revenue")
-              .filter(
-                (v) =>
-                  new Date(v.date).getDate() ===
+              : 1,
+          },
+          (_, i) => {
+            return {
+              date: new Date(
+                new Date().setMonth(new Date().getMonth() - i)
+              ).toLocaleDateString("pt-br", {
+                month: "2-digit",
+                year: "numeric",
+              }),
+              value1: recordsDisplayed
+                .filter((v) => v.category === "revenue")
+                .filter(
+                  (v) =>
+                    new Date(v.date).getMonth() ===
                     new Date(
-                      new Date().setDate(new Date().getDate() - i)
-                    ).getDate() &&
-                  new Date(v.date).getMonth() ===
-                    new Date(
-                      new Date().setDate(new Date().getDate() - i)
+                      new Date().setMonth(new Date().getMonth() - i)
                     ).getMonth()
-              )
-              .reduce((acc, v) => (acc += v.amount), 0),
-            value2: recordsDisplayed
-              .filter((v) => v.category === "expenditure")
-              .filter(
-                (v) =>
-                  new Date(v.date).getDate() ===
+                )
+                .reduce((acc, v) => (acc += v.totalAmount), 0),
+              value2: recordsDisplayed
+                .filter((v) => v.category === "expenditure")
+                .filter(
+                  (v) =>
+                    new Date(v.date).getMonth() ===
                     new Date(
-                      new Date().setDate(new Date().getDate() - i)
-                    ).getDate() &&
-                  new Date(v.date).getMonth() ===
-                    new Date(
-                      new Date().setDate(new Date().getDate() - i)
+                      new Date().setMonth(new Date().getMonth() - i)
                     ).getMonth()
-              )
-              .reduce((acc, v) => (acc += v.amount), 0),
-          };
-        }
-      ).reverse()
-    );
+                )
+                .reduce((acc, v) => (acc += v.totalAmount), 0),
+            };
+          }
+        ).reverse();
+      });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recordsDisplayed]);
 
@@ -125,7 +214,7 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
           dy={16}
           textAnchor="end"
           fill={
-            weekday === 6 || weekday === 0
+            (weekday === 6 || weekday === 0) && filterTime === "daily"
               ? "rgb(126, 34, 206)"
               : theme === "dark"
               ? "#fff"
@@ -133,7 +222,9 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
           }
           className={twMerge(
             "text-[0.6rem]",
-            (weekday === 6 || weekday === 0) && "font-bold"
+            (weekday === 6 || weekday === 0) &&
+              filterTime === "daily" &&
+              "font-bold"
           )}
         >
           {prevValue}
@@ -153,18 +244,30 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
     if (data.payload && data.payload.length > 0) {
       const { date, value1, value2 } = data.payload[0].payload;
 
-      const weekday = getWeekday(date);
+      let formattedDate = "";
 
-      const dayOfWeek = format(
-        parse(date, "dd/MM", new Date()),
-        "EEEE, dd 'de' MMMM",
-        {
-          locale: ptBR,
-        }
-      );
-      const formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
-        .slice(1)
-        .replace("-", " ")}`;
+      if (filterTime === "daily") {
+        const dayOfWeek = format(
+          parse(date, "dd/MM", new Date()),
+          "EEEE, dd 'de' MMMM",
+          { locale: ptBR }
+        );
+
+        formattedDate = `${dayOfWeek.charAt(0).toUpperCase()}${dayOfWeek
+          .slice(1)
+          .replace("-", " ")}`;
+      } else {
+        formattedDate = format(
+          parse(date, "MM/yyyy", new Date()),
+          "MMMM 'de' yyyy",
+          {
+            locale: ptBR,
+          }
+        );
+
+        formattedDate =
+          formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+      }
 
       return (
         <div className="text-xs">
@@ -177,12 +280,26 @@ export function MonthlyChart({ recordsInit, period }: MonthlyChartProps) {
           >
             {formattedDate}
           </span>
-          <br />
-          R$ {value1.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
-          (Receitas)
-          <br />
-          R$ {value2.toLocaleString("pt-br", { minimumFractionDigits: 2 })}{" "}
-          (Despesas)
+          {(filterCategory === "all" || filterCategory === "revenues") && (
+            <>
+              <br />
+              R${" "}
+              {value1.toLocaleString("pt-br", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              (Receitas)
+            </>
+          )}
+          {(filterCategory === "all" || filterCategory === "expenditures") && (
+            <>
+              <br />
+              R${" "}
+              {value2.toLocaleString("pt-br", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              (Despesas)
+            </>
+          )}
         </div>
       );
     }
