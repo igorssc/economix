@@ -7,5 +7,9 @@ export default async function LoginLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="bg-white dark:bg-gray-700">{children}</div>;
+  return (
+    <div className="bg-gray-100 dark:bg-zinc-950 dark:text-gray-300">
+      {children}
+    </div>
+  );
 }
